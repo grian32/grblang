@@ -3,7 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static char* read_file(const char* filename) {
+// read_file returns char* to the contents of the file & updates the int* size to the length of the string
+static char* read_file(const char* filename, long* size) {
     FILE* f = fopen(filename, "rb");
     if (!f) {
         perror("Failed to open file");
@@ -23,6 +24,7 @@ static char* read_file(const char* filename) {
 
     fread(buffer, 1, length, f);
     buffer[length] = '\0';
+    *size = length;
     fclose(f);
 
     return buffer;
