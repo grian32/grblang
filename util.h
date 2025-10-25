@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 // read_file returns char* to the contents of the file & updates the int* size to the length of the string
-static char* read_file(const char* filename, long* size) {
+static char* read_file(const char* filename, long* size_out) {
     FILE* f = fopen(filename, "rb");
     if (!f) {
         perror("Failed to open file");
@@ -24,7 +24,7 @@ static char* read_file(const char* filename, long* size) {
 
     fread(buffer, 1, length, f);
     buffer[length] = '\0';
-    *size = length;
+    *size_out = length;
     fclose(f);
 
     return buffer;
