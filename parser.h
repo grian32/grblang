@@ -36,8 +36,20 @@ typedef struct {
 void parser_init(Parser* p, Lexer* l);
 void parser_next(Parser* p);
 
+void print_ast(ASTNode* node, int indent);
+
 ASTNode* make_int(int value);
 ASTNode* make_binary_op(TokenType op, ASTNode* left, ASTNode* right);
 ASTNode* make_unary_op(TokenType op, ASTNode* right);
+
+ASTNode* parse_addsub(Parser* p);
+ASTNode* parse_primary(Parser* p);
+ASTNode* parse_unary(Parser* p);
+ASTNode* parse_muldiv(Parser* p);
+
+/**
+ * = parse_addsub; to be used as a top-level entry point
+ */
+ASTNode* parse_expr(Parser* p);
 
 #endif //GRBLANG_PARSER_H

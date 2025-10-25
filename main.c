@@ -1,6 +1,7 @@
 #include <stdbool.h>
 
 #include "lexer.h"
+#include "parser.h"
 #include "util.h"
 
 int main(void) {
@@ -10,29 +11,12 @@ int main(void) {
 
     Lexer l;
     lexer_init(&l, src);
+    Parser p;
+    parser_init(&p, &l);
 
-    Token *tokens = malloc(src_len * sizeof(Token));
+    ASTNode* node = parse_expr(&p);
 
-    Token tok;
-    int i = 0;
-    while ((tok = lex_next(&l)).type != TOK_EOF) {
-        tokens[i++] = tok;
-    }
+    print_ast(node, 0);
 
-    tokens[i].type = TOK_EOF;
-
-    i = 0;
-    while (tokens[i].type != TOK_EOF) {
-        char buffer[50] = {0};
-        token_string(tokens[i], buffer);
-        printf("%s ", buffer);
-        i++;
-    }
-    // print eof
-    char buffer[50] = {0};
-    token_string(tokens[i], buffer);
-    printf("%s", buffer);
-
-    free(tokens);
     return 0;
 }
