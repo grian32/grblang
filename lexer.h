@@ -10,14 +10,16 @@ typedef struct {
 } Lexer;
 
 typedef enum {
-    TOK_UNKNOWN, // unk
-    TOK_ERROR, // err
+    TOK_UNKNOWN,
+    TOK_ERROR,
     TOK_PLUS, // +
     TOK_MINUS, // -
     TOK_MULT, // *
     TOK_DIV, // /
+    TOK_LPAREN, // (
+    TOK_RPAREN, // )
     TOK_INT,
-    TOK_EOF // end of file
+    TOK_EOF
 } TokenType;
 
 typedef struct {

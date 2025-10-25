@@ -27,6 +27,12 @@ void token_string(Token t, char buffer[50]) {
         case TOK_INT:
             sprintf(buffer, "INT(=%d, @%d)", t.value.int_val, t.length);
             break;
+        case TOK_LPAREN:
+            sprintf(buffer, "LPAREN(@%d)", t.length);
+            break;
+        case TOK_RPAREN:
+            sprintf(buffer, "RPAREN(@%d)", t.length);
+            break;
         default:
             sprintf(buffer, "UNKNOWN");
     }
@@ -97,6 +103,12 @@ Token lex_next(Lexer* l) {
             break;
         case '/':
             t.type = TOK_DIV;
+            break;
+        case '(':
+            t.type = TOK_LPAREN;
+            break;
+        case ')':
+            t.type = TOK_RPAREN;
             break;
         case '\0':
             t.type = TOK_EOF;
