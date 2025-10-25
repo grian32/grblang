@@ -10,7 +10,8 @@ typedef struct {
 } Lexer;
 
 typedef enum {
-    TOK_UNKNOWN, // +
+    TOK_UNKNOWN, // unk
+    TOK_ERROR, // err
     TOK_PLUS, // +
     TOK_MINUS, // -
     TOK_MULT, // *
@@ -19,21 +20,22 @@ typedef enum {
     TOK_EOF // end of file
 } TokenType;
 
-
-const char* token_type_string(TokenType tt);
-
 typedef struct {
     TokenType type;
+    const char* start_literal;
+    int length;
     union {
         int int_val;
         // TODO: more as needed
     } value;
 } Token;
 
+void token_string(Token t, char buffer[50]);
+
 void lex_advance(Lexer* l);
 void lexer_init(Lexer* l, const char* src);
 void lex_skip_whitespace(Lexer* l);
-int lex_parse_int(Lexer* l);
+int lex_parse_int(Lexer* l, const char** start_out, int* len_out);
 Token lex_next(Lexer* l);
 
 #endif //GRBLANG_LEXER_H
