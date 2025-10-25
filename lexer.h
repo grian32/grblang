@@ -33,6 +33,7 @@ typedef struct {
 void lex_advance(Lexer* l);
 void lexer_init(Lexer* l, const char* src);
 void lex_skip_whitespace(Lexer* l);
+int lex_parse_int(Lexer* l);
 Token lex_next(Lexer* l);
 
 #endif //GRBLANG_LEXER_H

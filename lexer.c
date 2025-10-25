@@ -1,5 +1,7 @@
 #include "lexer.h"
 
+#define IS_DIGIT(c) c >= '0' && c <= '9'
+
 const char* token_type_string(TokenType tt) {
     switch (tt) {
         case TOK_PLUS:
@@ -34,6 +36,11 @@ void lex_skip_whitespace(Lexer* l) {
     }
 }
 
+int lex_parse_int(Lexer* l) {
+    char* 
+    return -1;
+}
+
 Token lex_next(Lexer* l) {
     Token t;
     lex_skip_whitespace(l);
@@ -55,6 +62,10 @@ Token lex_next(Lexer* l) {
             t.type = TOK_EOF;
             break;
         default:
+            if (IS_DIGIT(l->current)) {
+                t.type = TOK_INT;
+                t.value.int_val = lex_parse_int(l);
+            }
             t.type = TOK_UNKNOWN;
             break;
     }
