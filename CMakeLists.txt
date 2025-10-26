@@ -10,6 +10,8 @@ add_library(grblang_lib lexer.c
         parser.h
         bytecode_emit.h
         util.h
+        stack.c
+        stack.h
 )
 
 target_include_directories(grblang_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
