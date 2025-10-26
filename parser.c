@@ -75,7 +75,7 @@ ASTNode* parse_primary(Parser* p) {
         parser_next(p);
         ASTNode* expr = parse_addsub(p);
         if (p->curr.type != TOK_RPAREN) {
-            fprintf(stderr, "unexpected token in parse_primary\n");
+            fprintf(stderr, "unexpected token (likely unmatched parens) in parse_primary\n");
             exit(1);
             // TODO: actual error handling
         }
