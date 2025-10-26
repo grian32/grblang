@@ -34,3 +34,76 @@ void bytecode_resize_const(BytecodeEmitter* b) {
     b->constants = new_constants;
     b->const_capacity = new_capacity;
 }
+
+void bytecode_gen(ASTNode* node, BytecodeEmitter* b) {
+    if (!node) return;
+
+    switch (node->type) {
+        case AST_INT:
+            emit_push_int(b, node->int_val);
+            break;
+        case AST_BINARY_OP:
+            bytecode_gen(node->binary_op.left, b);
+            bytecode_gen(node->binary_op.right, b);
+
+            switch (node->binary_op.op) {
+                case TOK_PLUS: emit_add(b); break;
+                case TOK_MINUS: emit_sub(b); break;
+                case TOK_MULT: emit_mul(b); break;
+                case TOK_DIV: emit_div(b); break;
+                default: break;
+            }
+            break;
+        case AST_UNARY_OP:
+            bytecode_gen(node->unary_op.right, b);
+
+            switch (node->unary_op.op) {
+                case TOK_MINUS: emit_neg(b); break;
+                default: break;
+            }
+    }
+}
+
+uint16_t add_const(BytecodeEmitter* b, int val) {
+    if (b->const_count >= b->const_capacity) {
+        bytecode_resize_const(b);
+    }
+
+    b->constants[b->const_count] = val;
+    return b->const_count++;
+}
+
+void emit_push_int(BytecodeEmitter* b, int val) {
+    uint16_t idx = add_const(b, val);
+    emit_byte(b, OP_PUSH);
+    emit_byte(b, (idx >> 8) & 0xFF);
+    emit_byte(b, idx & 0xFF);
+}
+
+void emit_byte(BytecodeEmitter* b, uint8_t val) {
+    if (b->code_size >= b->code_capacity) {
+        bytecode_resize_code(b);
+    }
+
+    b->code[b->code_size++] = val;
+}
+
+void emit_add(BytecodeEmitter* b) {
+    emit_byte(b, OP_ADD);
+}
+
+void emit_sub(BytecodeEmitter* b) {
+    emit_byte(b, OP_SUB);
+}
+
+void emit_mul(BytecodeEmitter* b) {
+    emit_byte(b, OP_MUL);
+}
+
+void emit_div(BytecodeEmitter* b) {
+    emit_byte(b, OP_DIV);
+}
+
+void emit_neg(BytecodeEmitter* b) {
+    emit_byte(b, OP_NEG);
+}
