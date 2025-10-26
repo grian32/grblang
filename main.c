@@ -5,6 +5,7 @@
 #include "parser.h"
 #include "stack.h"
 #include "util.h"
+#include "vm.h"
 
 
 void test_stack() {
@@ -43,9 +44,12 @@ int main(void) {
     bytecode_init(&b);
     bytecode_gen(node, &b);
 
-    for (int i = 0; i < b.code_size; i++) {
-        printf("%d ", b.code[i]);
-    }
+    VM vm;
+    Stack s;
+    vm_init(&vm, &b);
+    vm_run(&vm);
+
+    printf("vm result: %d", vm.stack.data[vm.stack.top]);
 
     return 0;
 }
