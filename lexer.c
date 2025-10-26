@@ -4,8 +4,10 @@
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define IS_DIGIT(c) ((c) >= '0' && (c) <= '9')
+#define IS_ALPHA(c) (((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') || ((c) == '_'))
 
 void token_string(Token t, char buffer[50]) {
     switch (t.type) {
@@ -30,8 +32,20 @@ void token_string(Token t, char buffer[50]) {
         case TOK_LPAREN:
             sprintf(buffer, "LPAREN(@%d)", t.length);
             break;
+        case TOK_EQUALS:
+            sprintf(buffer, "EQUALS(@%d)", t.length);
+            break;
+        case TOK_VAR:
+            sprintf(buffer, "VAR(@%d)", t.length);
+            break;
+        case TOK_IDENT:
+            sprintf(buffer, "IDENT(=%s, @%d)", t.value.ident_val, t.length);
+            break;
         case TOK_RPAREN:
             sprintf(buffer, "RPAREN(@%d)", t.length);
+            break;
+        case TOK_SEMICOLON:
+            sprintf(buffer, "SEMICOLON(@%d)", t.length);
             break;
         default:
             sprintf(buffer, "UNKNOWN");
@@ -84,6 +98,28 @@ int lex_parse_int(Lexer* l, const char **start_out, int* length_out) {
     return (int) conv_int;
 }
 
+TokenType lex_parse_ident(Lexer* l, char** ident_out, const char** start_out, int* len_out) {
+    const char* start = &l->current;
+    char ident_str[256];
+    int i = 0;
+
+    while (IS_ALPHA(l->current) && i < 256) {
+        ident_str[i++] = l->current;
+        lex_advance(l);
+    }
+    ident_str[i] = '\0';
+
+    if (start_out) *start_out = start;
+    if (len_out) *len_out = i;
+
+    if (strcmp(ident_str, "var") == 0) {
+        return TOK_VAR;
+    }
+
+    if (ident_out) *ident_out = strdup(ident_str);
+    return TOK_IDENT;
+}
+
 Token lex_next(Lexer* l) {
     Token t;
     lex_skip_whitespace(l);
@@ -110,6 +146,12 @@ Token lex_next(Lexer* l) {
         case ')':
             t.type = TOK_RPAREN;
             break;
+        case '=':
+            t.type = TOK_EQUALS;
+            break;
+        case ';':
+            t.type = TOK_SEMICOLON;
+            break;
         case '\0':
             t.type = TOK_EOF;
             t.length = 0;
@@ -122,6 +164,10 @@ Token lex_next(Lexer* l) {
                 } else {
                     t.type = TOK_INT;
                 }
+                return t;
+            }
+            if (IS_ALPHA(l->current)) {
+                t.type = lex_parse_ident(l, &t.value.ident_val, &t.start_literal, &t.length);
                 return t;
             }
 
