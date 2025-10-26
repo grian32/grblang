@@ -1,14 +1,14 @@
 #include "bytecode_emit.h"
 
 void bytecode_init(BytecodeEmitter* b) {
-    int initial_capacity = 100;
+    int initial_capacity = 128;
     b->code = malloc(initial_capacity * sizeof(uint8_t));
     b->code_size = 0;
-    b->code_capacity = 100;
+    b->code_capacity = initial_capacity;
 
     b->constants = malloc(initial_capacity * sizeof(int));
     b->const_count = 0;
-    b->const_capacity = 100;
+    b->const_capacity = initial_capacity;
 }
 
 void bytecode_resize_code(BytecodeEmitter* b) {
