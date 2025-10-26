@@ -45,7 +45,6 @@ int main(void) {
     bytecode_gen(node, &b);
 
     VM vm;
-    Stack s;
     vm_init(&vm, &b);
     vm_run(&vm);
 
