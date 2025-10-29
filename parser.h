@@ -9,12 +9,16 @@ typedef enum {
     AST_BINARY_OP,
     AST_UNARY_OP,
     AST_PROGRAM,
+    AST_VAR_DECL,
+    AST_VAR_ASSIGN,
+    AST_VAR_REF,
 } ASTNodeType;
 
 typedef struct ASTNode {
     ASTNodeType type;
     union {
         int int_val;
+
         struct {
             TokenType op;
             struct ASTNode* left;
@@ -24,10 +28,27 @@ typedef struct ASTNode {
             TokenType op;
             struct ASTNode* right;
         } unary_op;
+
         struct {
             struct ASTNode** statements;
             int count;
         } program;
+
+        // currently same between var_decl/assign but in future might want to add types to var_decl etc, so keeping as is for now
+        struct {
+            char* name;
+            struct ASTNode* value;
+            int slot;
+        } var_decl;
+        struct {
+            char* name;
+            struct ASTNode* value;
+            int slot;
+        } var_assign;
+        struct {
+            char* name;
+            int slot;
+        } var_ref;
     };
 } ASTNode;
 
@@ -47,6 +68,9 @@ ASTNode* make_int(int value);
 ASTNode* make_binary_op(TokenType op, ASTNode* left, ASTNode* right);
 ASTNode* make_unary_op(TokenType op, ASTNode* right);
 ASTNode* make_program(ASTNode** statements, int count);
+ASTNode* make_var_decl(char* name, ASTNode* value);
+ASTNode* make_var_assign(char* name, ASTNode* value);
+ASTNode* make_var_ref(char* name);
 
 ASTNode* parse_addsub(Parser* p);
 ASTNode* parse_primary(Parser* p);

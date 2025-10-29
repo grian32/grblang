@@ -79,11 +79,46 @@ ASTNode* make_program(ASTNode** statements, int count) {
     return node;
 }
 
+ASTNode* make_var_decl(char* name, ASTNode* value) {
+    ASTNode* node = malloc(sizeof(ASTNode));
+
+    node->type = AST_VAR_DECL;
+    node->var_decl.name = name;
+    node->var_decl.value = value;
+
+    return node;
+}
+
+ASTNode* make_var_assign(char* name, ASTNode* value) {
+    ASTNode* node = malloc(sizeof(ASTNode));
+
+    node->type = AST_VAR_ASSIGN;
+    node->var_assign.name = name;
+    node->var_assign.value = value;
+
+    return node;
+}
+
+ASTNode* make_var_ref(char* name) {
+    ASTNode* node = malloc(sizeof(ASTNode));
+
+    node->type = AST_VAR_REF;
+    node->var_ref.name = name;
+
+    return node;
+}
+
 ASTNode* parse_primary(Parser* p) {
     if (p->curr.type == TOK_INT) {
         ASTNode* t = make_int(p->curr.value.int_val);
         parser_next(p);
         return t;
+    }
+
+    if (p->curr.type == TOK_IDENT) {
+        char* name = p->curr.value.ident_val;
+        parser_next(p);
+        return make_var_ref(name);
     }
 
     if (p->curr.type == TOK_LPAREN) {
@@ -143,7 +178,34 @@ ASTNode* parse_expr(Parser* p) {
 }
 
 ASTNode* parse_statement(Parser *p) {
-    // TODO
+    if (p->curr.type == TOK_VAR) {
+        parser_next(p);
+        if (p->curr.type != TOK_IDENT) {
+            fprintf(stderr, "expected identifier after `var`\n");
+            exit(1);
+        };
+
+        char* name = p->curr.value.ident_val;
+        parser_next(p);
+
+        if (p->curr.type != TOK_EQUALS) {
+            fprintf(stderr, "expected equals after identifer in var declaration\n");
+            exit(1);
+        }
+        parser_next(p);
+
+        ASTNode* val = parse_expr(p);
+        return make_var_decl(name, val);
+    }
+
+    if (p->curr.type == TOK_IDENT && p->peek.type == TOK_EQUALS) {
+        char* name = p->curr.value.ident_val;
+        parser_next(p);
+        parser_next(p);
+
+        ASTNode* val = parse_expr(p);
+        return make_var_assign(name, val);
+    }
 
     return parse_expr(p);
 }
