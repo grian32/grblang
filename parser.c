@@ -64,6 +64,21 @@ ASTNode* make_unary_op(TokenType op, ASTNode* right) {
     return node;
 }
 
+ASTNode* make_program(ASTNode** statements, int count) {
+    ASTNode** new_statements = realloc(statements, count * sizeof(ASTNode*));
+    if (!new_statements) {
+        fprintf(stderr, "failed to realloc statements arr in make_program");
+        exit(1);
+    }
+
+    ASTNode* node = malloc(sizeof(ASTNode));
+    node->type = AST_PROGRAM;
+    node->program.statements = new_statements;
+    node->program.count = count;
+
+    return node;
+}
+
 ASTNode* parse_primary(Parser* p) {
     if (p->curr.type == TOK_INT) {
         ASTNode* t = make_int(p->curr.value.int_val);
@@ -125,4 +140,36 @@ ASTNode* parse_addsub(Parser* p) {
 
 ASTNode* parse_expr(Parser* p) {
     return parse_addsub(p);
+}
+
+ASTNode* parse_statement(Parser *p) {
+    // TODO
+
+    return parse_expr(p);
+}
+
+ASTNode* parse_program(Parser *p) {
+    int capacity = 128, count = 0;
+    ASTNode** statements = malloc(sizeof(ASTNode*) * capacity);
+
+    while (p->curr.type != TOK_EOF) {
+        if (count >= capacity) {
+            capacity *= 2;
+            ASTNode** new_statements = realloc(statements, sizeof(ASTNode*) * capacity);
+            if (!new_statements) {
+                fprintf(stderr, "failed to realloc statements arr\n");
+                exit(1);
+            }
+            statements = new_statements;
+        }
+
+        statements[count++] = parse_statement(p);
+        if (p->curr.type != TOK_SEMICOLON) {
+            fprintf(stderr, "semicolon expected after statement\n");
+            exit(1);
+        }
+        parser_next(p);
+    }
+
+    return make_program(statements, count);
 }

@@ -61,6 +61,11 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b) {
                 case TOK_MINUS: emit_neg(b); break;
                 default: break;
             }
+            break;
+        case AST_PROGRAM:
+            for (int i = 0; i < node->program.count; i++) {
+                bytecode_gen(node->program.statements[i], b);
+            }
     }
 }
 
