@@ -62,7 +62,7 @@ typedef struct {
 void parser_init(Parser* p, Lexer* l);
 void parser_next(Parser* p);
 
-void print_ast(ASTNode* node, int indent);
+void print_ast(ASTNode* node, int indent, bool newline);
 
 ASTNode* make_int(int value);
 ASTNode* make_binary_op(TokenType op, ASTNode* left, ASTNode* right);

@@ -16,7 +16,7 @@ void parser_next(Parser* p) {
     p->peek = lex_next(p->lexer);
 }
 
-void print_ast(ASTNode* node, int indent) {
+void print_ast(ASTNode* node, int indent, bool newline) {
     if (!node) return;
     for (int i = 0; i < indent; i++) {
         printf(" ");
@@ -24,16 +24,56 @@ void print_ast(ASTNode* node, int indent) {
 
     switch (node->type) {
         case AST_INT:
-            printf("AST_INT(%d)\n",node->int_val);
+            printf("AST_INT(%d)",node->int_val);
+            if (newline) {
+                printf("\n");
+            }
             break;
         case AST_BINARY_OP:
-            printf("AST_BINARY_OP(%c)\n", node->binary_op.op == TOK_PLUS ? '+' : node->binary_op.op == TOK_MINUS ? '-' : node->binary_op.op == TOK_MULT ? '*' : '/');
-            print_ast(node->binary_op.left, indent + 1);
-            print_ast(node->binary_op.right, indent + 1);
+            printf("AST_BINARY_OP(%c)", node->binary_op.op == TOK_PLUS ? '+' : node->binary_op.op == TOK_MINUS ? '-' : node->binary_op.op == TOK_MULT ? '*' : '/');
+            if (newline) {
+                printf("\n");
+            }
+            print_ast(node->binary_op.left, indent + 1, true);
+            print_ast(node->binary_op.right, indent + 1, true);
             break;
         case AST_UNARY_OP:
-            printf("AST_UNARY_OP(%c)\n",node->binary_op.op == TOK_MINUS ? '-' : ' ');
-            print_ast(node->unary_op.right, indent+1);
+            printf("AST_UNARY_OP(%c)",node->binary_op.op == TOK_MINUS ? '-' : ' ');
+            if (newline) {
+                printf("\n");
+            }
+            print_ast(node->unary_op.right, indent+1, true);
+            break;
+        case AST_PROGRAM:
+            printf("AST_PROGRAM");
+            if (newline) {
+                printf("\n");
+            }
+            for (int i = 0; i < node->program.count; i++) {
+                print_ast(node->program.statements[i], indent+1, true);
+            }
+            break;
+        case AST_VAR_ASSIGN:
+            printf("AST_VAR_ASSIGN(slot=%d,%s=", node->var_assign.slot, node->var_assign.name);
+            print_ast(node->var_assign.value, 0, false);
+            printf(")");
+            if (newline) {
+                printf("\n");
+            }
+            break;
+        case AST_VAR_DECL:
+            printf("AST_VAR_DECL(slot=%d,%s=", node->var_assign.slot,node->var_decl.name);
+            print_ast(node->var_decl.value, 0, false);
+            printf(")");
+            if (newline) {
+                printf("\n");
+            }
+            break;
+        case AST_VAR_REF:
+            printf("AST_VAR_REF(slot=%d,%s)", node->var_ref.slot, node->var_ref.name);
+            if (newline) {
+                printf("\n");
+            }
             break;
         default:
             printf("unknown ast type: %d\n", node->type);
