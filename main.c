@@ -3,6 +3,7 @@
 #include "bytecode_emit.h"
 #include "lexer.h"
 #include "parser.h"
+#include "resolver.h"
 #include "stack.h"
 #include "util.h"
 #include "vm.h"
@@ -53,6 +54,9 @@ int main(void) {
     parser_init(&p, &l);
 
     ASTNode* node = parse_program(&p);
+    Resolver r;
+    resolver_init(&r);
+    resolve(node, &r);
     print_ast(node, 0, true);
     // BytecodeEmitter b;
     // bytecode_init(&b);

@@ -14,6 +14,8 @@ add_library(grblang_lib lexer.c
         stack.h
         vm.c
         vm.h
+        resolver.c
+        resolver.h
 )
 
 target_include_directories(grblang_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
