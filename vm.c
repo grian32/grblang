@@ -1,10 +1,14 @@
 #include "vm.h"
 
-inline void vm_init(VM *vm, BytecodeEmitter *b) {
+inline void vm_init(VM *vm, BytecodeEmitter *b, int num_locals) {
     stack_init(&vm->stack);
     vm->constants = b->constants;
     vm->code = b->code;
     vm->code_size = b->code_size;
+
+    vm->locals_size = num_locals;
+    vm->locals = malloc(num_locals * sizeof(int));
+
     vm->pc = 0;
 }
 
@@ -47,6 +51,26 @@ void vm_run(VM* vm) {
             case OP_NEG: {
                 int a = stack_pop(&vm->stack);
                 stack_push(&vm->stack, -a);
+                break;
+            }
+            case OP_LOAD_LOCAL: {
+                int slot = (vm->code[vm->pc] << 8) | vm->code[vm->pc + 1];
+                vm->pc += 2;
+                if (slot >= vm->locals_size) {
+                    fprintf(stderr, "invalid slot `%d` for locals\n", slot);
+                    exit(1);
+                }
+                stack_push(&vm->stack, vm->locals[slot]);
+                break;
+            }
+            case OP_STORE_LOCAL: {
+                int slot = (vm->code[vm->pc] << 8) | vm->code[vm->pc + 1];
+                vm->pc += 2;
+                if (slot >= vm->locals_size) {
+                    fprintf(stderr, "invalid slot `%d` for locals\n", slot);
+                    exit(1);
+                }
+                vm->locals[slot] = stack_pop(&vm->stack);
                 break;
             }
 

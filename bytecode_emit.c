@@ -62,10 +62,22 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b) {
                 default: break;
             }
             break;
+        case AST_VAR_DECL:
+            bytecode_gen(node->var_decl.value, b);
+            emit_store_local(b, node->var_decl.slot);
+            break;
+        case AST_VAR_ASSIGN:
+            bytecode_gen(node->var_assign.value, b);
+            emit_store_local(b, node->var_assign.slot);
+            break;
+        case AST_VAR_REF:
+            emit_load_local(b, node->var_ref.slot);
+            break;
         case AST_PROGRAM:
             for (int i = 0; i < node->program.count; i++) {
                 bytecode_gen(node->program.statements[i], b);
             }
+            break;
     }
 }
 
@@ -91,6 +103,18 @@ void emit_byte(BytecodeEmitter* b, uint8_t val) {
     }
 
     b->code[b->code_size++] = val;
+}
+
+void emit_store_local(BytecodeEmitter* b, int slot) {
+    emit_byte(b, OP_STORE_LOCAL);
+    emit_byte(b, (slot>> 8) & 0xFF);
+    emit_byte(b, slot & 0xFF);
+}
+
+void emit_load_local(BytecodeEmitter* b, int slot) {
+    emit_byte(b, OP_LOAD_LOCAL);
+    emit_byte(b, (slot>> 8) & 0xFF);
+    emit_byte(b, slot & 0xFF);
 }
 
 void emit_add(BytecodeEmitter* b) {

@@ -23,6 +23,8 @@ typedef enum {
     OP_MUL,
     OP_DIV,
     OP_NEG,
+    OP_STORE_LOCAL,
+    OP_LOAD_LOCAL,
 } BytecodeOp;
 
 void bytecode_init(BytecodeEmitter* b);
@@ -36,6 +38,9 @@ uint16_t add_const(BytecodeEmitter* b, int val);
 
 void emit_push_int(BytecodeEmitter* b, int val);
 void emit_byte(BytecodeEmitter* b, uint8_t val);
+
+void emit_store_local(BytecodeEmitter* b, int slot);
+void emit_load_local(BytecodeEmitter* b, int slot);
 
 void emit_add(BytecodeEmitter* b);
 void emit_sub(BytecodeEmitter* b);

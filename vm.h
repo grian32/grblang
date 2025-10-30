@@ -7,13 +7,18 @@
 
 typedef struct {
     Stack stack;
+
     int* constants;
+
+    int* locals;
+    int locals_size;
+
     uint8_t* code;
     int code_size;
     int pc;
 } VM;
 
-void vm_init(VM* vm, BytecodeEmitter* b);
+void vm_init(VM* vm, BytecodeEmitter* b, int num_locals);
 
 void vm_run(VM* vm);
 
