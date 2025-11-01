@@ -29,6 +29,12 @@ void print_ast(ASTNode* node, int indent, bool newline) {
                 printf("\n");
             }
             break;
+        case AST_BOOL:
+            printf("AST_BOOL(%s)", node->bool_val ? "true" : "false");
+            if (newline) {
+                printf("\n");
+            }
+            break;
         case AST_BINARY_OP:
             printf("AST_BINARY_OP(%c)", node->binary_op.op == TOK_PLUS ? '+' : node->binary_op.op == TOK_MINUS ? '-' : node->binary_op.op == TOK_MULT ? '*' : '/');
             if (newline) {
