@@ -6,6 +6,7 @@
 
 typedef enum {
     AST_INT,
+    AST_BOOL,
     AST_BINARY_OP,
     AST_UNARY_OP,
     AST_PROGRAM,
@@ -18,6 +19,7 @@ typedef struct ASTNode {
     ASTNodeType type;
     union {
         int int_val;
+        bool bool_val;
 
         struct {
             TokenType op;
@@ -65,6 +67,9 @@ void parser_next(Parser* p);
 void print_ast(ASTNode* node, int indent, bool newline);
 
 ASTNode* make_int(int value);
+// separate true and false because i'd just be doubling up checks on tokentype if it was just one make_bool which is wasteful
+ASTNode* make_true_bool();
+ASTNode* make_false_bool();
 ASTNode* make_binary_op(TokenType op, ASTNode* left, ASTNode* right);
 ASTNode* make_unary_op(TokenType op, ASTNode* right);
 ASTNode* make_program(ASTNode** statements, int count);

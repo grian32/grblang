@@ -38,6 +38,12 @@ void token_string(Token t, char buffer[50]) {
         case TOK_VAR:
             sprintf(buffer, "VAR(@%d)", t.length);
             break;
+        case TOK_TRUE:
+            sprintf(buffer, "TRUE(@%d)", t.length);
+            break;
+        case TOK_FALSE:
+            sprintf(buffer, "FALSE(@%d)", t.length);
+            break;
         case TOK_IDENT:
             sprintf(buffer, "IDENT(=%s, @%d)", t.value.ident_val, t.length);
             break;
@@ -114,6 +120,14 @@ TokenType lex_parse_ident(Lexer* l, char** ident_out, const char** start_out, in
 
     if (strcmp(ident_str, "var") == 0) {
         return TOK_VAR;
+    }
+
+    if (strcmp(ident_str, "true") == 0) {
+        return TOK_TRUE;
+    }
+
+    if (strcmp(ident_str, "false") == 0) {
+        return TOK_FALSE;
     }
 
     if (ident_out) *ident_out = strdup(ident_str);

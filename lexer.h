@@ -22,6 +22,8 @@ typedef enum {
     TOK_SEMICOLON, // ;
     TOK_IDENT,
     TOK_VAR, // var
+    TOK_TRUE, // true
+    TOK_FALSE, // false
     TOK_INT,
     TOK_EOF
 } TokenType;

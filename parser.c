@@ -87,6 +87,20 @@ ASTNode* make_int(int value) {
     return node;
 }
 
+ASTNode* make_true_bool() {
+    ASTNode *node = malloc(sizeof(ASTNode));
+    node->type = AST_BOOL;
+    node->bool_val = true;
+    return node;
+}
+
+ASTNode* make_false_bool() {
+    ASTNode *node = malloc(sizeof(ASTNode));
+    node->type = AST_BOOL;
+    node->bool_val = false;
+    return node;
+}
+
 ASTNode* make_binary_op(TokenType op, ASTNode* left, ASTNode* right) {
     ASTNode* node = malloc(sizeof(ASTNode));
     node->type = AST_BINARY_OP;
@@ -150,9 +164,21 @@ ASTNode* make_var_ref(char* name) {
 
 ASTNode* parse_primary(Parser* p) {
     if (p->curr.type == TOK_INT) {
-        ASTNode* t = make_int(p->curr.value.int_val);
+        ASTNode* n = make_int(p->curr.value.int_val);
         parser_next(p);
-        return t;
+        return n;
+    }
+
+    if (p->curr.type == TOK_TRUE) {
+        ASTNode* n = make_true_bool();
+        parser_next(p);
+        return n;
+    }
+
+    if (p->curr.type == TOK_FALSE) {
+        ASTNode* n = make_false_bool();
+        parser_next(p);
+        return n;
     }
 
     if (p->curr.type == TOK_IDENT) {
