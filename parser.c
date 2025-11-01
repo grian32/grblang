@@ -139,6 +139,11 @@ ASTNode* make_var_decl(char* name, ASTNode* value) {
     node->type = AST_VAR_DECL;
     node->var_decl.name = name;
     node->var_decl.value = value;
+    if (value->type == AST_INT) {
+        node->var_type = VALUE_INT;
+    } else if (value->type == AST_BOOL) {
+        node->var_type = VALUE_BOOL;
+    }
 
     return node;
 }

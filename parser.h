@@ -15,8 +15,14 @@ typedef enum {
     AST_VAR_REF,
 } ASTNodeType;
 
+typedef enum {
+    VALUE_INT,
+    VALUE_BOOL
+} VarType;
+
 typedef struct ASTNode {
     ASTNodeType type;
+    VarType var_type;
     union {
         int int_val;
         bool bool_val;

@@ -4,6 +4,7 @@
 
 typedef struct {
     char** names;
+    VarType* types;
     int count;
     int capacity;
 } Resolver;
@@ -11,7 +12,7 @@ typedef struct {
 void resolver_init(Resolver* r);
 void resolver_resize(Resolver* r);
 
-int resolver_declare(Resolver* r, char* name);
+int resolver_declare(Resolver* r, char* name, VarType type);
 int resolver_lookup(Resolver* r, char* name);
 
 void resolve(ASTNode* node, Resolver* r);
