@@ -8,9 +8,9 @@
 typedef struct {
     Stack stack;
 
-    int* constants;
+    StackValue* constants;
 
-    int* locals;
+    StackValue* locals;
     int locals_size;
 
     uint8_t* code;

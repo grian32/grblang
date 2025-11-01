@@ -7,28 +7,27 @@
 #include "stack.h"
 #include "util.h"
 #include "vm.h"
-
-
-void test_stack() {
-    printf("test stack\n");
-
-    Stack stack;
-    stack_init(&stack);
-    printf("pushing 44\n");
-    stack_push(&stack, 44);
-    printf("pushing 42\n");
-    stack_push(&stack, 42);
-    printf("pushing 32\n");
-    stack_push(&stack, 32);
-    printf("pushing 12\n");
-    stack_push(&stack, 12);
-
-    printf("out:\n");
-    printf("%d\n", stack_pop(&stack));
-    printf("%d\n", stack_pop(&stack));
-    printf("%d\n", stack_pop(&stack));
-    printf("%d\n", stack_pop(&stack));
-}
+//
+// void test_stack() {
+//     printf("test stack\n");
+//
+//     Stack stack;
+//     stack_init(&stack);
+//     printf("pushing 44\n");
+//     stack_push(&stack, 44);
+//     printf("pushing 42\n");
+//     stack_push(&stack, 42);
+//     printf("pushing 32\n");
+//     stack_push(&stack, 32);
+//     printf("pushing 12\n");
+//     stack_push(&stack, 12);
+//
+//     printf("out:\n");
+//     printf("%d\n", stack_pop(&stack));
+//     printf("%d\n", stack_pop(&stack));
+//     printf("%d\n", stack_pop(&stack));
+//     printf("%d\n", stack_pop(&stack));
+// }
 
 int main(void) {
     long src_len;
@@ -58,16 +57,18 @@ int main(void) {
     resolver_init(&r);
     resolve(node, &r);
     print_ast(node, 0, true);
-    //
-    // BytecodeEmitter b;
-    // bytecode_init(&b);
-    // bytecode_gen(node, &b);
-    //
-    // VM vm;
-    // vm_init(&vm, &b, r.count);
-    // vm_run(&vm);
-    //
-    // printf("vm result: %d", vm.stack.data[vm.stack.top]);
+
+    BytecodeEmitter b;
+    bytecode_init(&b);
+    bytecode_gen(node, &b);
+
+    VM vm;
+    vm_init(&vm, &b, r.count);
+    vm_run(&vm);
+
+    char buffer[50];
+    stack_value_string(vm.stack.data[vm.stack.top], buffer);
+    printf("vm result: %s", buffer);
 
     return 0;
 }
