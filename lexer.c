@@ -20,6 +20,9 @@ void token_string(Token t, char buffer[50]) {
         case TOK_MULT:
             sprintf(buffer, "MULT(@%d)", t.length);
             break;
+        case TOK_EXCLAM:
+            sprintf(buffer, "EXCLAM(@%d)", t.length);
+            break;
         case TOK_DIV:
             sprintf(buffer, "DIV(@%d)", t.length);
             break;
@@ -165,6 +168,9 @@ Token lex_next(Lexer* l) {
             break;
         case ';':
             t.type = TOK_SEMICOLON;
+            break;
+        case '!':
+            t.type = TOK_EXCLAM;
             break;
         case '\0':
             t.type = TOK_EOF;

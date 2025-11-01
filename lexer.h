@@ -20,6 +20,7 @@ typedef enum {
     TOK_RPAREN, // )
     TOK_EQUALS, // =
     TOK_SEMICOLON, // ;
+    TOK_EXCLAM, // !
     TOK_IDENT,
     TOK_VAR, // var
     TOK_TRUE, // true

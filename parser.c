@@ -38,7 +38,7 @@ void print_ast(ASTNode* node, int indent, bool newline) {
             print_ast(node->binary_op.right, indent + 1, true);
             break;
         case AST_UNARY_OP:
-            printf("AST_UNARY_OP(%c)",node->binary_op.op == TOK_MINUS ? '-' : ' ');
+            printf("AST_UNARY_OP(%c)",node->unary_op.op == TOK_MINUS ? '-' : '!');
             if (newline) {
                 printf("\n");
             }
@@ -199,15 +199,16 @@ ASTNode* parse_primary(Parser* p) {
         return expr;
     }
 
-    fprintf(stderr, "unexpected token in parse_primary\n");
+    fprintf(stderr, "unexpected token %d in parse_primary\n", p->curr.type);
     exit(1);
 }
 
 ASTNode* parse_unary(Parser* p) {
-    if (p->curr.type == TOK_MINUS) {
+    if (p->curr.type == TOK_MINUS || p->curr.type == TOK_EXCLAM) {
+        TokenType op = p->curr.type;
         parser_next(p);
         ASTNode* right = parse_unary(p);
-        return make_unary_op(TOK_MINUS, right);
+        return make_unary_op(op, right);
     }
 
     return parse_primary(p);
