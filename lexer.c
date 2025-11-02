@@ -35,7 +35,7 @@ void token_string(Token t, char buffer[50]) {
         case TOK_LPAREN:
             sprintf(buffer, "LPAREN(@%d)", t.length);
             break;
-        case TOK_EQUALS:
+        case TOK_ASSIGN:
             sprintf(buffer, "EQUALS(@%d)", t.length);
             break;
         case TOK_VAR:
@@ -164,7 +164,7 @@ Token lex_next(Lexer* l) {
             t.type = TOK_RPAREN;
             break;
         case '=':
-            t.type = TOK_EQUALS;
+            t.type = TOK_ASSIGN;
             break;
         case ';':
             t.type = TOK_SEMICOLON;

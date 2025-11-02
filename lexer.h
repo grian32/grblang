@@ -18,7 +18,7 @@ typedef enum {
     TOK_DIV, // /
     TOK_LPAREN, // (
     TOK_RPAREN, // )
-    TOK_EQUALS, // =
+    TOK_ASSIGN, // =
     TOK_SEMICOLON, // ;
     TOK_EXCLAM, // !
     TOK_IDENT,

@@ -266,7 +266,7 @@ ASTNode* parse_statement(Parser *p) {
         char* name = p->curr.value.ident_val;
         parser_next(p);
 
-        if (p->curr.type != TOK_EQUALS) {
+        if (p->curr.type != TOK_ASSIGN) {
             fprintf(stderr, "expected equals after identifer in var declaration\n");
             exit(1);
         }
@@ -276,7 +276,7 @@ ASTNode* parse_statement(Parser *p) {
         return make_var_decl(name, val);
     }
 
-    if (p->curr.type == TOK_IDENT && p->peek.type == TOK_EQUALS) {
+    if (p->curr.type == TOK_IDENT && p->peek.type == TOK_ASSIGN) {
         char* name = p->curr.value.ident_val;
         parser_next(p);
         parser_next(p);
