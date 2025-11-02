@@ -142,23 +142,23 @@ void emit_load(BytecodeEmitter* b, ASTNodeType type, int slot) {
 }
 
 void emit_add(BytecodeEmitter* b) {
-    emit_byte(b, OP_ADD);
+    emit_byte(b, OP_IADD);
 }
 
 void emit_sub(BytecodeEmitter* b) {
-    emit_byte(b, OP_SUB);
+    emit_byte(b, OP_ISUB);
 }
 
 void emit_mul(BytecodeEmitter* b) {
-    emit_byte(b, OP_MUL);
+    emit_byte(b, OP_IMUL);
 }
 
 void emit_div(BytecodeEmitter* b) {
-    emit_byte(b, OP_DIV);
+    emit_byte(b, OP_IDIV);
 }
 
 void emit_neg(BytecodeEmitter* b) {
-    emit_byte(b, OP_NEG);
+    emit_byte(b, OP_INEG);
 }
 
 void emit_not(BytecodeEmitter* b) {

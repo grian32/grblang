@@ -37,35 +37,35 @@ void vm_run(VM* vm) {
                 stack_push(&vm->stack, sv);
                 break;
             }
-            case OP_ADD: {
+            case OP_IADD: {
                 StackValue b = stack_pop(&vm->stack);
                 StackValue a = stack_pop(&vm->stack);
                 StackValue sv = {.type = VALUE_INT, .int_val = a.int_val + b.int_val};
                 stack_push(&vm->stack, sv);
                 break;
             }
-            case OP_SUB: {
+            case OP_ISUB: {
                 StackValue b = stack_pop(&vm->stack);
                 StackValue a = stack_pop(&vm->stack);
                 StackValue sv = {.type = VALUE_INT, .int_val = a.int_val - b.int_val};
                 stack_push(&vm->stack, sv);
                 break;
             }
-            case OP_MUL: {
+            case OP_IMUL: {
                 StackValue b = stack_pop(&vm->stack);
                 StackValue a = stack_pop(&vm->stack);
                 StackValue sv = {.type = VALUE_INT, .int_val = a.int_val * b.int_val};
                 stack_push(&vm->stack, sv);
                 break;
             }
-            case OP_DIV: {
+            case OP_IDIV: {
                 StackValue b = stack_pop(&vm->stack);
                 StackValue a = stack_pop(&vm->stack);
                 StackValue sv = {.type = VALUE_INT, .int_val = a.int_val / b.int_val};
                 stack_push(&vm->stack, sv);
                 break;
             }
-            case OP_NEG: {
+            case OP_INEG: {
                 StackValue a = stack_pop(&vm->stack);
                 StackValue sv = {.type = VALUE_INT, .int_val = -a.int_val};
                 stack_push(&vm->stack, sv);

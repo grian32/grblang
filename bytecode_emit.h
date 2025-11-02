@@ -19,11 +19,11 @@ typedef enum {
     OP_PUSH,
     OP_PUSH_TRUE, // true
     OP_PUSH_FALSE, // false
-    OP_ADD,
-    OP_SUB,
-    OP_MUL,
-    OP_DIV,
-    OP_NEG,
+    OP_IADD,
+    OP_ISUB,
+    OP_IMUL,
+    OP_IDIV,
+    OP_INEG,
     OP_ISTORE, // int
     OP_ILOAD,
     OP_BSTORE, // bool
