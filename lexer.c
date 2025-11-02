@@ -36,7 +36,7 @@ void token_string(Token t, char buffer[50]) {
             sprintf(buffer, "LPAREN(@%d)", t.length);
             break;
         case TOK_ASSIGN:
-            sprintf(buffer, "EQUALS(@%d)", t.length);
+            sprintf(buffer, "ASSIGN(@%d)", t.length);
             break;
         case TOK_VAR:
             sprintf(buffer, "VAR(@%d)", t.length);
@@ -55,6 +55,15 @@ void token_string(Token t, char buffer[50]) {
             break;
         case TOK_SEMICOLON:
             sprintf(buffer, "SEMICOLON(@%d)", t.length);
+            break;
+        case TOK_LESS:
+            sprintf(buffer, "LESS(@%d)", t.length);
+            break;
+        case TOK_GREATER:
+            sprintf(buffer, "GREATER(@%d)", t.length);
+            break;
+        case TOK_EQUALS:
+            sprintf(buffer, "EQUALS(@%d)", t.length);
             break;
         default:
             sprintf(buffer, "UNKNOWN");
@@ -165,12 +174,26 @@ Token lex_next(Lexer* l) {
             break;
         case '=':
             t.type = TOK_ASSIGN;
-            break;
+            lex_advance(l);
+
+            if (l->current == '=') {
+                t.type = TOK_EQUALS;
+                t.length++;
+                lex_advance(l);
+            }
+
+            return t;
         case ';':
             t.type = TOK_SEMICOLON;
             break;
         case '!':
             t.type = TOK_EXCLAM;
+            break;
+        case '<':
+            t.type = TOK_LESS;
+            break;
+        case '>':
+            t.type = TOK_GREATER;
             break;
         case '\0':
             t.type = TOK_EOF;

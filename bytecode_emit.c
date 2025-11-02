@@ -53,10 +53,13 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b) {
             bytecode_gen(node->binary_op.right, b);
 
             switch (node->binary_op.op) {
-                case TOK_PLUS: emit_add(b); break;
-                case TOK_MINUS: emit_sub(b); break;
-                case TOK_MULT: emit_mul(b); break;
-                case TOK_DIV: emit_div(b); break;
+                case TOK_PLUS: emit_iadd(b); break;
+                case TOK_MINUS: emit_isub(b); break;
+                case TOK_MULT: emit_imul(b); break;
+                case TOK_DIV: emit_idiv(b); break;
+                case TOK_GREATER: emit_igt(b); break;
+                case TOK_LESS: emit_ilt(b); break;
+                case TOK_EQUALS: emit_ieq(b); break;
                 default: break;
             }
             break;
@@ -141,20 +144,32 @@ void emit_load(BytecodeEmitter* b, ASTNodeType type, int slot) {
     emit_byte(b, slot & 0xFF);
 }
 
-void emit_add(BytecodeEmitter* b) {
+void emit_iadd(BytecodeEmitter* b) {
     emit_byte(b, OP_IADD);
 }
 
-void emit_sub(BytecodeEmitter* b) {
+void emit_isub(BytecodeEmitter* b) {
     emit_byte(b, OP_ISUB);
 }
 
-void emit_mul(BytecodeEmitter* b) {
+void emit_imul(BytecodeEmitter* b) {
     emit_byte(b, OP_IMUL);
 }
 
-void emit_div(BytecodeEmitter* b) {
+void emit_idiv(BytecodeEmitter* b) {
     emit_byte(b, OP_IDIV);
+}
+
+void emit_igt(BytecodeEmitter* b) {
+    emit_byte(b, OP_IGT);
+}
+
+void emit_ilt(BytecodeEmitter* b) {
+    emit_byte(b, OP_ILT);
+}
+
+void emit_ieq(BytecodeEmitter* b) {
+    emit_byte(b, OP_IEQ);
 }
 
 void emit_neg(BytecodeEmitter* b) {

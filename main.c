@@ -8,6 +8,19 @@
 #include "util.h"
 #include "vm.h"
 
+void print_lexer(Lexer* l) {
+    Token next;
+    while ((next=lex_next(l)).type != TOK_EOF) {
+        char buffer[50];
+        token_string(next, buffer);
+        printf("%s ", buffer);
+    }
+
+    char buffer[50];
+    token_string(next, buffer);
+    printf("%s ", buffer);
+}
+
 int main(void) {
     long src_len;
     char* src = read_file("../test.grb", &src_len);
@@ -22,7 +35,6 @@ int main(void) {
     Resolver r;
     resolver_init(&r);
     resolve(node, &r);
-    print_ast(node, 0, true);
 
     BytecodeEmitter b;
     bytecode_init(&b);

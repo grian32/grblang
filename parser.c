@@ -16,6 +16,21 @@ void parser_next(Parser* p) {
     p->peek = lex_next(p->lexer);
 }
 
+void op_string(TokenType op, char buffer[2]) {
+    buffer[1] = ' ';
+    switch (op) {
+        case TOK_EQUALS: buffer[0] = '='; buffer[1] = '='; break;
+        case TOK_GREATER: buffer[0] = '>'; break;
+        case TOK_LESS: buffer[0] = '<'; break;
+        case TOK_DIV: buffer[0] = '/'; break;
+        case TOK_MULT: buffer[0] = '*'; break;
+        case TOK_PLUS: buffer[0] = '+'; break;
+        case TOK_MINUS: buffer[0] = '-'; break;
+
+        default: break;
+    }
+}
+
 void print_ast(ASTNode* node, int indent, bool newline) {
     if (!node) return;
     for (int i = 0; i < indent; i++) {
@@ -36,7 +51,9 @@ void print_ast(ASTNode* node, int indent, bool newline) {
             }
             break;
         case AST_BINARY_OP:
-            printf("AST_BINARY_OP(%c)", node->binary_op.op == TOK_PLUS ? '+' : node->binary_op.op == TOK_MINUS ? '-' : node->binary_op.op == TOK_MULT ? '*' : '/');
+            char op[2];
+            op_string(node->binary_op.op, op);
+            printf("AST_BINARY_OP(%s)", op);
             if (newline) {
                 printf("\n");
             }
@@ -225,6 +242,18 @@ ASTNode* parse_unary(Parser* p) {
     return parse_primary(p);
 }
 
+ASTNode* parse_comparison(Parser* p) {
+    ASTNode* left = parse_addsub(p);
+    if (p->curr.type == TOK_LESS || p->curr.type == TOK_GREATER || p->curr.type == TOK_EQUALS) {
+        TokenType op = p->curr.type;
+        parser_next(p);
+        ASTNode* right = parse_addsub(p);
+        return make_binary_op(op, left, right);
+    }
+
+    return left;
+}
+
 ASTNode* parse_muldiv(Parser* p) {
     ASTNode* left = parse_unary(p);
 
@@ -252,7 +281,7 @@ ASTNode* parse_addsub(Parser* p) {
 }
 
 ASTNode* parse_expr(Parser* p) {
-    return parse_addsub(p);
+    return parse_comparison(p);
 }
 
 ASTNode* parse_statement(Parser *p) {

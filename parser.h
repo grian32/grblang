@@ -70,6 +70,7 @@ typedef struct {
 void parser_init(Parser* p, Lexer* l);
 void parser_next(Parser* p);
 
+void op_string(TokenType op, char buffer[2]);
 void print_ast(ASTNode* node, int indent, bool newline);
 
 ASTNode* make_int(int value);
@@ -83,6 +84,7 @@ ASTNode* make_var_decl(char* name, ASTNode* value);
 ASTNode* make_var_assign(char* name, ASTNode* value);
 ASTNode* make_var_ref(char* name);
 
+ASTNode* parse_comparison(Parser* p);
 ASTNode* parse_addsub(Parser* p);
 ASTNode* parse_primary(Parser* p);
 ASTNode* parse_unary(Parser* p);
