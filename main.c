@@ -23,7 +23,7 @@ void print_lexer(Lexer* l) {
 
 int main(void) {
     long src_len;
-    char* src = read_file("../test.grb", &src_len);
+    char* src = read_file("./test.grb", &src_len);
     printf("from: %s\n", src);
 
     Lexer l;
