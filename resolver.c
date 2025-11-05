@@ -81,7 +81,7 @@ void resolve(ASTNode* node, Resolver* r) {
         case AST_VAR_REF:
             node->var_ref.slot = resolver_lookup(r, node->var_ref.name);
             if (node->var_ref.slot == -1) {
-                fprintf(stderr, "undefined variable `%s` when trying to reference\n", node->var_assign.name);
+                fprintf(stderr, "undefined variable `%s` when trying to reference\n", node->var_ref.name);
                 exit(1);
             }
             node->var_type = r->types[node->var_ref.slot];

@@ -69,8 +69,6 @@ char* var_type_string(VarType type) {
         return "bool";
     case VALUE_UNKNOWN:
         return "unknown";
-    default:
-        return "fucked var type mate";
     }
 }
 

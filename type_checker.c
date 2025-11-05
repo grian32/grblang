@@ -72,7 +72,7 @@ void type_check(ASTNode *node, Resolver* r) {
                 break;
             case TOK_EQUALS:
                 if (
-                    (left_type != VALUE_BOOL|| right_type != VALUE_BOOL) &&
+                    (left_type != VALUE_BOOL || right_type != VALUE_BOOL) &&
                     (left_type != VALUE_INT || right_type != VALUE_INT)
                 ) {
                     fprintf(stderr, "error: cannot use %s operator on %s and %s\n",
@@ -123,6 +123,7 @@ void type_check(ASTNode *node, Resolver* r) {
                 node->var_assign.name,
                 var_type_string(var_type)
             );
+            exit(1);
         }
         break;
     default:
