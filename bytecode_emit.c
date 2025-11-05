@@ -1,4 +1,5 @@
 #include "bytecode_emit.h"
+#include "parser.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -82,14 +83,14 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b) {
             break;
         case AST_VAR_DECL:
             bytecode_gen(node->var_decl.value, b);
-            emit_store(b, node->type, node->var_decl.slot);
+            emit_store(b, node->var_type, node->var_decl.slot);
             break;
         case AST_VAR_ASSIGN:
             bytecode_gen(node->var_assign.value, b);
-            emit_store(b, node->type, node->var_assign.slot);
+            emit_store(b, node->var_type, node->var_assign.slot);
             break;
         case AST_VAR_REF:
-            emit_load(b, node->type, node->var_ref.slot);
+            emit_load(b, node->var_type, node->var_ref.slot);
             break;
         case AST_PROGRAM:
             for (int i = 0; i < node->program.count; i++) {
@@ -132,8 +133,8 @@ void emit_byte(BytecodeEmitter* b, uint8_t val) {
     b->code[b->code_size++] = val;
 }
 
-void emit_store(BytecodeEmitter* b, ASTNodeType type, int slot) {
-    if (type == AST_INT) {
+void emit_store(BytecodeEmitter* b, VarType type, int slot) {
+    if (type == VALUE_INT) {
         emit_byte(b, OP_ISTORE);
     } else {
         emit_byte(b, OP_BSTORE);
@@ -142,8 +143,8 @@ void emit_store(BytecodeEmitter* b, ASTNodeType type, int slot) {
     emit_byte(b, slot & 0xFF);
 }
 
-void emit_load(BytecodeEmitter* b, ASTNodeType type, int slot) {
-    if (type == AST_INT) {
+void emit_load(BytecodeEmitter* b, VarType type, int slot) {
+    if (type == VALUE_INT) {
         emit_byte(b, OP_ILOAD);
     } else {
         emit_byte(b, OP_BLOAD);

@@ -48,8 +48,8 @@ void emit_push_int(BytecodeEmitter* b, int val);
 void emit_push_bool(BytecodeEmitter* b, bool val);
 void emit_byte(BytecodeEmitter* b, uint8_t val);
 
-void emit_store(BytecodeEmitter* b, ASTNodeType type, int slot);
-void emit_load(BytecodeEmitter* b, ASTNodeType type, int slot);
+void emit_store(BytecodeEmitter* b, VarType type, int slot);
+void emit_load(BytecodeEmitter* b, VarType type, int slot);
 
 void emit_iadd(BytecodeEmitter* b);
 void emit_isub(BytecodeEmitter* b);
