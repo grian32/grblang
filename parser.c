@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "lexer.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,6 +30,17 @@ VarType get_expr_type_ast(ASTNode* node) {
             }
             return VALUE_UNKNOWN;
         }
+        default:
+            return VALUE_UNKNOWN;
+    }
+}
+
+VarType tok_to_var_type(TokenType tt) {
+    switch (tt) {
+        case TOK_INT_TYPE:
+            return VALUE_INT;
+        case TOK_BOOL_TYPE:
+            return VALUE_BOOL;
         default:
             return VALUE_UNKNOWN;
     }
@@ -195,14 +207,18 @@ ASTNode* make_program(ASTNode** statements, int count) {
     return node;
 }
 
-ASTNode* make_var_decl(char* name, ASTNode* value) {
+ASTNode* make_var_decl(char* name, ASTNode* value, VarType type) {
     ASTNode* node = malloc(sizeof(ASTNode));
 
     node->type = AST_VAR_DECL;
     node->var_decl.name = name;
     node->var_decl.value = value;
 
-    node->var_type = get_expr_type_ast(node->var_decl.value);
+    if (type != VALUE_UNKNOWN) {
+        node->var_type = type;
+    } else {
+        node->var_type = get_expr_type_ast(node->var_decl.value);
+    }
 
     return node;
 }
@@ -331,14 +347,29 @@ ASTNode* parse_statement(Parser *p) {
         char* name = p->curr.value.ident_val;
         parser_next(p);
 
-        if (p->curr.type != TOK_ASSIGN) {
-            fprintf(stderr, "expected equals after identifer in var declaration\n");
+        if (p->curr.type == TOK_ASSIGN) {
+            parser_next(p);
+            ASTNode* val = parse_expr(p);
+            return make_var_decl(name, val, VALUE_UNKNOWN);
+        } else if (p->curr.type == TOK_COLON) {
+            parser_next(p);
+            if (p->curr.type != TOK_BOOL_TYPE && p->curr.type != TOK_INT_TYPE) {
+                fprintf(stderr, "expected type ex:`bool`, `int` after colon in var declaration\n");
+                exit(1);
+            }
+            VarType var_type = tok_to_var_type(p->curr.type);
+            parser_next(p);
+            ASTNode* val = parse_expr(p);
+            return make_var_decl(name, val, var_type);
+        } else {
+            fprintf(stderr, "expected equals or type declaration after identifer in var declaration\n");
             exit(1);
         }
-        parser_next(p);
 
-        ASTNode* val = parse_expr(p);
-        return make_var_decl(name, val);
+        // parser_next(p);
+
+        // ASTNode* val = parse_expr(p);
+        // return make_var_decl(name, val, TOK_UNKNOWN);
     }
 
     if (p->curr.type == TOK_IDENT && p->peek.type == TOK_ASSIGN) {

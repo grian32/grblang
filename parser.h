@@ -79,6 +79,8 @@ typedef struct {
 } Parser;
 
 VarType get_expr_type_ast(ASTNode* node);
+// convert TOK_XXX_TYPE tokens to VALUE_XXX VarType
+VarType tok_to_var_type(TokenType tt);
 
 void parser_init(Parser* p, Lexer* l);
 void parser_next(Parser* p);
@@ -93,7 +95,7 @@ ASTNode* make_false_bool();
 ASTNode* make_binary_op(TokenType op, ASTNode* left, ASTNode* right);
 ASTNode* make_unary_op(TokenType op, ASTNode* right);
 ASTNode* make_program(ASTNode** statements, int count);
-ASTNode* make_var_decl(char* name, ASTNode* value);
+ASTNode* make_var_decl(char* name, ASTNode* value, VarType type);
 ASTNode* make_var_assign(char* name, ASTNode* value);
 ASTNode* make_var_ref(char* name);
 
