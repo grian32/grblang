@@ -204,7 +204,6 @@ ASTNode* make_var_decl(char* name, ASTNode* value) {
     node->var_decl.name = name;
     node->var_decl.value = value;
 
-    // the issue is here dipshit, you need to get expr type or something along those lines for this :S!!!
     node->var_type = get_expr_type_ast(node->var_decl.value);
 
     return node;
@@ -216,8 +215,6 @@ ASTNode* make_var_assign(char* name, ASTNode* value) {
     node->type = AST_VAR_ASSIGN;
     node->var_assign.name = name;
     node->var_assign.value = value;
-
-    node->var_type = get_expr_type_ast(node->var_assign.value);
 
     return node;
 }

@@ -50,7 +50,7 @@ int main(void) {
 
     char buffer[50];
     stack_value_string(vm.stack.data[vm.stack.top], buffer);
-    printf("vm result: %s", buffer);
+    printf("vm result: %s\n", buffer);
 
     return 0;
 }

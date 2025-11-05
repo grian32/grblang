@@ -73,14 +73,15 @@ void resolve(ASTNode* node, Resolver* r) {
             resolve(node->var_assign.value, r);
             node->var_assign.slot = resolver_lookup(r, node->var_assign.name);
             if (node->var_assign.slot == -1) {
-                fprintf(stderr, "undefined variable `%s` when trying to reassign", node->var_assign.name);
+                fprintf(stderr, "undefined variable `%s` when trying to reassign\n", node->var_assign.name);
                 exit(1);
             }
+            node->var_type = r->types[node->var_assign.slot];
             break;
         case AST_VAR_REF:
             node->var_ref.slot = resolver_lookup(r, node->var_ref.name);
             if (node->var_ref.slot == -1) {
-                fprintf(stderr, "undefined variable `%s` when trying to reference", node->var_assign.name);
+                fprintf(stderr, "undefined variable `%s` when trying to reference\n", node->var_assign.name);
                 exit(1);
             }
             node->var_type = r->types[node->var_ref.slot];

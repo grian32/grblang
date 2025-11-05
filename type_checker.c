@@ -118,7 +118,7 @@ void type_check(ASTNode *node, Resolver* r) {
         VarType var_type = node->var_type;
         VarType value_type = get_expr_type(node->var_assign.value, r);
         if (var_type != value_type) {
-            fprintf(stderr, "error: cannot assign %s to variable `%s` of type %s",
+            fprintf(stderr, "error: cannot assign %s to variable `%s` of type %s\n",
                 var_type_string(value_type),
                 node->var_assign.name,
                 var_type_string(var_type)
