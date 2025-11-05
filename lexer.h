@@ -18,10 +18,16 @@ typedef enum {
     TOK_DIV, // /
     TOK_LPAREN, // (
     TOK_RPAREN, // )
-    TOK_EQUALS, // =
+    TOK_ASSIGN, // =
     TOK_SEMICOLON, // ;
+    TOK_EXCLAM, // !
+    TOK_LESS, // <
+    TOK_GREATER, // >
     TOK_IDENT,
+    TOK_EQUALS,
     TOK_VAR, // var
+    TOK_TRUE, // true
+    TOK_FALSE, // false
     TOK_INT,
     TOK_EOF
 } TokenType;

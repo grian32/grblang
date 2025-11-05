@@ -1,5 +1,8 @@
 #include "vm.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+
 inline void vm_init(VM *vm, BytecodeEmitter *b, int num_locals) {
     stack_init(&vm->stack);
     vm->constants = b->constants;
@@ -7,7 +10,7 @@ inline void vm_init(VM *vm, BytecodeEmitter *b, int num_locals) {
     vm->code_size = b->code_size;
 
     vm->locals_size = num_locals;
-    vm->locals = malloc(num_locals * sizeof(int));
+    vm->locals = malloc(num_locals * sizeof(StackValue));
 
     vm->pc = 0;
 }
@@ -20,40 +23,89 @@ void vm_run(VM* vm) {
             case OP_PUSH: {
                 uint16_t idx = (vm->code[vm->pc] << 8) | vm->code[vm->pc + 1];
                 vm->pc += 2;
-                int value = vm->constants[idx];
+                StackValue value = vm->constants[idx];
                 stack_push(&vm->stack, value);
                 break;
             }
-            case OP_ADD: {
-                int b = stack_pop(&vm->stack);
-                int a = stack_pop(&vm->stack);
-                stack_push(&vm->stack, a + b);
+            case OP_PUSH_TRUE: {
+                StackValue sv = {.type = VALUE_BOOL, .bool_val = true};
+                stack_push(&vm->stack, sv);
                 break;
             }
-            case OP_SUB: {
-                int b = stack_pop(&vm->stack);
-                int a = stack_pop(&vm->stack);
-                stack_push(&vm->stack, a - b);
+            case OP_PUSH_FALSE: {
+                StackValue sv = {.type = VALUE_BOOL, .bool_val = false};
+                stack_push(&vm->stack, sv);
                 break;
             }
-            case OP_MUL: {
-                int b = stack_pop(&vm->stack);
-                int a = stack_pop(&vm->stack);
-                stack_push(&vm->stack, a * b);
+            case OP_IADD: {
+                StackValue b = stack_pop(&vm->stack);
+                StackValue a = stack_pop(&vm->stack);
+                StackValue sv = {.type = VALUE_INT, .int_val = a.int_val + b.int_val};
+                stack_push(&vm->stack, sv);
                 break;
             }
-            case OP_DIV: {
-                int b = stack_pop(&vm->stack);
-                int a = stack_pop(&vm->stack);
-                stack_push(&vm->stack, a / b);
+            case OP_ISUB: {
+                StackValue b = stack_pop(&vm->stack);
+                StackValue a = stack_pop(&vm->stack);
+                StackValue sv = {.type = VALUE_INT, .int_val = a.int_val - b.int_val};
+                stack_push(&vm->stack, sv);
                 break;
             }
-            case OP_NEG: {
-                int a = stack_pop(&vm->stack);
-                stack_push(&vm->stack, -a);
+            case OP_IMUL: {
+                StackValue b = stack_pop(&vm->stack);
+                StackValue a = stack_pop(&vm->stack);
+                StackValue sv = {.type = VALUE_INT, .int_val = a.int_val * b.int_val};
+                stack_push(&vm->stack, sv);
                 break;
             }
-            case OP_LOAD_LOCAL: {
+            case OP_IDIV: {
+                StackValue b = stack_pop(&vm->stack);
+                StackValue a = stack_pop(&vm->stack);
+                StackValue sv = {.type = VALUE_INT, .int_val = a.int_val / b.int_val};
+                stack_push(&vm->stack, sv);
+                break;
+            }
+            case OP_IGT: {
+                StackValue b = stack_pop(&vm->stack);
+                StackValue a = stack_pop(&vm->stack);
+                StackValue sv = {.type = VALUE_BOOL, .bool_val = a.int_val > b.int_val};
+                stack_push(&vm->stack, sv);
+                break;
+            }
+            case OP_ILT: {
+                StackValue b = stack_pop(&vm->stack);
+                StackValue a = stack_pop(&vm->stack);
+                StackValue sv = {.type = VALUE_BOOL, .bool_val = a.int_val < b.int_val};
+                stack_push(&vm->stack, sv);
+                break;
+            }
+            case OP_IEQ: {
+                StackValue b = stack_pop(&vm->stack);
+                StackValue a = stack_pop(&vm->stack);
+                StackValue sv = {.type = VALUE_BOOL, .bool_val = a.int_val == b.int_val};
+                stack_push(&vm->stack, sv);
+                break;
+            }
+            case OP_BEQ: {
+                StackValue b = stack_pop(&vm->stack);
+                StackValue a = stack_pop(&vm->stack);
+                StackValue sv = {.type = VALUE_BOOL, .bool_val = a.bool_val == b.bool_val};
+                stack_push(&vm->stack, sv);
+                break;
+            }
+            case OP_INEG: {
+                StackValue a = stack_pop(&vm->stack);
+                StackValue sv = {.type = VALUE_INT, .int_val = -a.int_val};
+                stack_push(&vm->stack, sv);
+                break;
+            }
+            case OP_NOT:
+                StackValue a = stack_pop(&vm->stack);
+                StackValue sv = {.type = VALUE_BOOL, .bool_val = !a.bool_val};
+                stack_push(&vm->stack, sv);
+                break;
+            case OP_BLOAD:
+            case OP_ILOAD: {
                 int slot = (vm->code[vm->pc] << 8) | vm->code[vm->pc + 1];
                 vm->pc += 2;
                 if (slot >= vm->locals_size) {
@@ -63,7 +115,8 @@ void vm_run(VM* vm) {
                 stack_push(&vm->stack, vm->locals[slot]);
                 break;
             }
-            case OP_STORE_LOCAL: {
+            case OP_BSTORE:
+            case OP_ISTORE: {
                 int slot = (vm->code[vm->pc] << 8) | vm->code[vm->pc + 1];
                 vm->pc += 2;
                 if (slot >= vm->locals_size) {

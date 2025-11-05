@@ -3,6 +3,37 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+VarType get_expr_type_ast(ASTNode* node) {
+    if (!node) return VALUE_UNKNOWN;
+
+    switch (node->type) {
+        case AST_INT:
+            return VALUE_INT;
+        case AST_BOOL:
+            return VALUE_BOOL;
+        case AST_BINARY_OP: {
+            TokenType op = node->binary_op.op;
+            if (op == TOK_PLUS || op == TOK_MINUS || op == TOK_MULT || op == TOK_DIV) {
+                return VALUE_INT;
+            } else if (op == TOK_LESS || op == TOK_GREATER || op == TOK_EQUALS) {
+                return VALUE_BOOL;
+            }
+            return VALUE_UNKNOWN;
+        }
+        case AST_UNARY_OP: {
+            TokenType op = node->unary_op.op;
+            if (op == TOK_MINUS) {
+                return VALUE_INT;
+            } else if (op == TOK_EXCLAM) {
+                return VALUE_BOOL;
+            }
+            return VALUE_UNKNOWN;
+        }
+        default:
+            return VALUE_UNKNOWN;
+    }
+}
+
 void parser_init(Parser* p, Lexer* l) {
     p->lexer = l;
 
@@ -14,6 +45,31 @@ void parser_init(Parser* p, Lexer* l) {
 void parser_next(Parser* p) {
     p->curr = p->peek;
     p->peek = lex_next(p->lexer);
+}
+
+char* op_string(TokenType op) {
+    switch (op) {
+        case TOK_EQUALS: return "==";
+        case TOK_GREATER: return ">";
+        case TOK_LESS: return "<";
+        case TOK_DIV: return "/";
+        case TOK_MULT: return "*";
+        case TOK_PLUS: return "+";
+        case TOK_MINUS: return "-";
+
+        default: return "";
+    }
+}
+
+char* var_type_string(VarType type) {
+    switch (type) {
+    case VALUE_INT:
+        return "int";
+    case VALUE_BOOL:
+        return "bool";
+    case VALUE_UNKNOWN:
+        return "unknown";
+    }
 }
 
 void print_ast(ASTNode* node, int indent, bool newline) {
@@ -29,8 +85,14 @@ void print_ast(ASTNode* node, int indent, bool newline) {
                 printf("\n");
             }
             break;
+        case AST_BOOL:
+            printf("AST_BOOL(%s)", node->bool_val ? "true" : "false");
+            if (newline) {
+                printf("\n");
+            }
+            break;
         case AST_BINARY_OP:
-            printf("AST_BINARY_OP(%c)", node->binary_op.op == TOK_PLUS ? '+' : node->binary_op.op == TOK_MINUS ? '-' : node->binary_op.op == TOK_MULT ? '*' : '/');
+            printf("AST_BINARY_OP(%s)", op_string(node->binary_op.op));
             if (newline) {
                 printf("\n");
             }
@@ -38,7 +100,7 @@ void print_ast(ASTNode* node, int indent, bool newline) {
             print_ast(node->binary_op.right, indent + 1, true);
             break;
         case AST_UNARY_OP:
-            printf("AST_UNARY_OP(%c)",node->binary_op.op == TOK_MINUS ? '-' : ' ');
+            printf("AST_UNARY_OP(%c)",node->unary_op.op == TOK_MINUS ? '-' : '!');
             if (newline) {
                 printf("\n");
             }
@@ -56,7 +118,7 @@ void print_ast(ASTNode* node, int indent, bool newline) {
         case AST_VAR_ASSIGN:
             printf("AST_VAR_ASSIGN(slot=%d,%s=", node->var_assign.slot, node->var_assign.name);
             print_ast(node->var_assign.value, 0, false);
-            printf(")");
+            printf(";t=%s)", var_type_string(node->var_type));
             if (newline) {
                 printf("\n");
             }
@@ -64,13 +126,13 @@ void print_ast(ASTNode* node, int indent, bool newline) {
         case AST_VAR_DECL:
             printf("AST_VAR_DECL(slot=%d,%s=", node->var_assign.slot,node->var_decl.name);
             print_ast(node->var_decl.value, 0, false);
-            printf(")");
+            printf(";t=%s)", var_type_string(node->var_type));
             if (newline) {
                 printf("\n");
             }
             break;
         case AST_VAR_REF:
-            printf("AST_VAR_REF(slot=%d,%s)", node->var_ref.slot, node->var_ref.name);
+            printf("AST_VAR_REF(slot=%d,%s;t=%s)", node->var_ref.slot, node->var_ref.name, var_type_string(node->var_type));
             if (newline) {
                 printf("\n");
             }
@@ -84,6 +146,20 @@ ASTNode* make_int(int value) {
     ASTNode *node = malloc(sizeof(ASTNode));
     node->type = AST_INT;
     node->int_val = value;
+    return node;
+}
+
+ASTNode* make_true_bool() {
+    ASTNode *node = malloc(sizeof(ASTNode));
+    node->type = AST_BOOL;
+    node->bool_val = true;
+    return node;
+}
+
+ASTNode* make_false_bool() {
+    ASTNode *node = malloc(sizeof(ASTNode));
+    node->type = AST_BOOL;
+    node->bool_val = false;
     return node;
 }
 
@@ -126,6 +202,8 @@ ASTNode* make_var_decl(char* name, ASTNode* value) {
     node->var_decl.name = name;
     node->var_decl.value = value;
 
+    node->var_type = get_expr_type_ast(node->var_decl.value);
+
     return node;
 }
 
@@ -150,9 +228,21 @@ ASTNode* make_var_ref(char* name) {
 
 ASTNode* parse_primary(Parser* p) {
     if (p->curr.type == TOK_INT) {
-        ASTNode* t = make_int(p->curr.value.int_val);
+        ASTNode* n = make_int(p->curr.value.int_val);
         parser_next(p);
-        return t;
+        return n;
+    }
+
+    if (p->curr.type == TOK_TRUE) {
+        ASTNode* n = make_true_bool();
+        parser_next(p);
+        return n;
+    }
+
+    if (p->curr.type == TOK_FALSE) {
+        ASTNode* n = make_false_bool();
+        parser_next(p);
+        return n;
     }
 
     if (p->curr.type == TOK_IDENT) {
@@ -173,18 +263,31 @@ ASTNode* parse_primary(Parser* p) {
         return expr;
     }
 
-    fprintf(stderr, "unexpected token in parse_primary\n");
+    fprintf(stderr, "unexpected token %d in parse_primary\n", p->curr.type);
     exit(1);
 }
 
 ASTNode* parse_unary(Parser* p) {
-    if (p->curr.type == TOK_MINUS) {
+    if (p->curr.type == TOK_MINUS || p->curr.type == TOK_EXCLAM) {
+        TokenType op = p->curr.type;
         parser_next(p);
         ASTNode* right = parse_unary(p);
-        return make_unary_op(TOK_MINUS, right);
+        return make_unary_op(op, right);
     }
 
     return parse_primary(p);
+}
+
+ASTNode* parse_comparison(Parser* p) {
+    ASTNode* left = parse_addsub(p);
+    if (p->curr.type == TOK_LESS || p->curr.type == TOK_GREATER || p->curr.type == TOK_EQUALS) {
+        TokenType op = p->curr.type;
+        parser_next(p);
+        ASTNode* right = parse_addsub(p);
+        return make_binary_op(op, left, right);
+    }
+
+    return left;
 }
 
 ASTNode* parse_muldiv(Parser* p) {
@@ -214,7 +317,7 @@ ASTNode* parse_addsub(Parser* p) {
 }
 
 ASTNode* parse_expr(Parser* p) {
-    return parse_addsub(p);
+    return parse_comparison(p);
 }
 
 ASTNode* parse_statement(Parser *p) {
@@ -228,7 +331,7 @@ ASTNode* parse_statement(Parser *p) {
         char* name = p->curr.value.ident_val;
         parser_next(p);
 
-        if (p->curr.type != TOK_EQUALS) {
+        if (p->curr.type != TOK_ASSIGN) {
             fprintf(stderr, "expected equals after identifer in var declaration\n");
             exit(1);
         }
@@ -238,7 +341,7 @@ ASTNode* parse_statement(Parser *p) {
         return make_var_decl(name, val);
     }
 
-    if (p->curr.type == TOK_IDENT && p->peek.type == TOK_EQUALS) {
+    if (p->curr.type == TOK_IDENT && p->peek.type == TOK_ASSIGN) {
         char* name = p->curr.value.ident_val;
         parser_next(p);
         parser_next(p);

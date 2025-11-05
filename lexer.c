@@ -20,6 +20,9 @@ void token_string(Token t, char buffer[50]) {
         case TOK_MULT:
             sprintf(buffer, "MULT(@%d)", t.length);
             break;
+        case TOK_EXCLAM:
+            sprintf(buffer, "EXCLAM(@%d)", t.length);
+            break;
         case TOK_DIV:
             sprintf(buffer, "DIV(@%d)", t.length);
             break;
@@ -32,11 +35,17 @@ void token_string(Token t, char buffer[50]) {
         case TOK_LPAREN:
             sprintf(buffer, "LPAREN(@%d)", t.length);
             break;
-        case TOK_EQUALS:
-            sprintf(buffer, "EQUALS(@%d)", t.length);
+        case TOK_ASSIGN:
+            sprintf(buffer, "ASSIGN(@%d)", t.length);
             break;
         case TOK_VAR:
             sprintf(buffer, "VAR(@%d)", t.length);
+            break;
+        case TOK_TRUE:
+            sprintf(buffer, "TRUE(@%d)", t.length);
+            break;
+        case TOK_FALSE:
+            sprintf(buffer, "FALSE(@%d)", t.length);
             break;
         case TOK_IDENT:
             sprintf(buffer, "IDENT(=%s, @%d)", t.value.ident_val, t.length);
@@ -46,6 +55,15 @@ void token_string(Token t, char buffer[50]) {
             break;
         case TOK_SEMICOLON:
             sprintf(buffer, "SEMICOLON(@%d)", t.length);
+            break;
+        case TOK_LESS:
+            sprintf(buffer, "LESS(@%d)", t.length);
+            break;
+        case TOK_GREATER:
+            sprintf(buffer, "GREATER(@%d)", t.length);
+            break;
+        case TOK_EQUALS:
+            sprintf(buffer, "EQUALS(@%d)", t.length);
             break;
         default:
             sprintf(buffer, "UNKNOWN");
@@ -116,6 +134,14 @@ TokenType lex_parse_ident(Lexer* l, char** ident_out, const char** start_out, in
         return TOK_VAR;
     }
 
+    if (strcmp(ident_str, "true") == 0) {
+        return TOK_TRUE;
+    }
+
+    if (strcmp(ident_str, "false") == 0) {
+        return TOK_FALSE;
+    }
+
     if (ident_out) *ident_out = strdup(ident_str);
     return TOK_IDENT;
 }
@@ -147,10 +173,27 @@ Token lex_next(Lexer* l) {
             t.type = TOK_RPAREN;
             break;
         case '=':
-            t.type = TOK_EQUALS;
-            break;
+            t.type = TOK_ASSIGN;
+            lex_advance(l);
+
+            if (l->current == '=') {
+                t.type = TOK_EQUALS;
+                t.length++;
+                lex_advance(l);
+            }
+
+            return t;
         case ';':
             t.type = TOK_SEMICOLON;
+            break;
+        case '!':
+            t.type = TOK_EXCLAM;
+            break;
+        case '<':
+            t.type = TOK_LESS;
+            break;
+        case '>':
+            t.type = TOK_GREATER;
             break;
         case '\0':
             t.type = TOK_EOF;

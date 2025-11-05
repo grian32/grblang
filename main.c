@@ -1,55 +1,35 @@
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "bytecode_emit.h"
 #include "lexer.h"
 #include "parser.h"
 #include "resolver.h"
 #include "stack.h"
+#include "type_checker.h"
 #include "util.h"
 #include "vm.h"
 
+void print_lexer(Lexer* l) {
+    Token next;
+    while ((next=lex_next(l)).type != TOK_EOF) {
+        char buffer[50];
+        token_string(next, buffer);
+        printf("%s ", buffer);
+    }
 
-void test_stack() {
-    printf("test stack\n");
-
-    Stack stack;
-    stack_init(&stack);
-    printf("pushing 44\n");
-    stack_push(&stack, 44);
-    printf("pushing 42\n");
-    stack_push(&stack, 42);
-    printf("pushing 32\n");
-    stack_push(&stack, 32);
-    printf("pushing 12\n");
-    stack_push(&stack, 12);
-
-    printf("out:\n");
-    printf("%d\n", stack_pop(&stack));
-    printf("%d\n", stack_pop(&stack));
-    printf("%d\n", stack_pop(&stack));
-    printf("%d\n", stack_pop(&stack));
+    char buffer[50];
+    token_string(next, buffer);
+    printf("%s ", buffer);
 }
 
 int main(void) {
     long src_len;
-    char* src = read_file("../test.grb", &src_len);
+    char* src = read_file("./test.grb", &src_len);
     printf("from: %s\n", src);
 
     Lexer l;
     lexer_init(&l, src);
-
-    // THIS WILL CONSUME ALL TOKENS AND BREAK PARSER IF ENABLED AT THE SAME TIME
-    // Token next;
-    // while ((next=lex_next(&l)).type != TOK_EOF) {
-    //     char buffer[50];
-    //     token_string(next, buffer);
-    //     printf("%s ", buffer);
-    // }
-    //
-    // char buffer[50];
-    // token_string(next, buffer);
-    // printf("%s ", buffer);
-
     Parser p;
     parser_init(&p, &l);
 
@@ -57,7 +37,8 @@ int main(void) {
     Resolver r;
     resolver_init(&r);
     resolve(node, &r);
-    print_ast(node, 0, true);
+
+    type_check(node, &r);
 
     BytecodeEmitter b;
     bytecode_init(&b);
@@ -67,7 +48,9 @@ int main(void) {
     vm_init(&vm, &b, r.count);
     vm_run(&vm);
 
-    printf("vm result: %d", vm.stack.data[vm.stack.top]);
+    char buffer[50];
+    stack_value_string(vm.stack.data[vm.stack.top], buffer);
+    printf("vm result: %s\n", buffer);
 
     return 0;
 }

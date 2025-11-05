@@ -6,6 +6,7 @@
 
 typedef enum {
     AST_INT,
+    AST_BOOL,
     AST_BINARY_OP,
     AST_UNARY_OP,
     AST_PROGRAM,
@@ -14,10 +15,28 @@ typedef enum {
     AST_VAR_REF,
 } ASTNodeType;
 
-typedef struct ASTNode {
-    ASTNodeType type;
+typedef enum {
+    VALUE_INT,
+    VALUE_BOOL,
+    VALUE_UNKNOWN,
+} VarType;
+
+char* var_type_string(VarType type);
+
+// basically purely used in resolver for the type checker
+typedef struct {
     union {
         int int_val;
+        bool bool_val;
+    };
+} VarValue;
+
+typedef struct ASTNode {
+    ASTNodeType type;
+    VarType var_type;
+    union {
+        int int_val;
+        bool bool_val;
 
         struct {
             TokenType op;
@@ -59,12 +78,18 @@ typedef struct {
     int pos;
 } Parser;
 
+VarType get_expr_type_ast(ASTNode* node);
+
 void parser_init(Parser* p, Lexer* l);
 void parser_next(Parser* p);
 
+char* op_string(TokenType op);
 void print_ast(ASTNode* node, int indent, bool newline);
 
 ASTNode* make_int(int value);
+// separate true and false because i'd just be doubling up checks on tokentype if it was just one make_bool which is wasteful
+ASTNode* make_true_bool();
+ASTNode* make_false_bool();
 ASTNode* make_binary_op(TokenType op, ASTNode* left, ASTNode* right);
 ASTNode* make_unary_op(TokenType op, ASTNode* right);
 ASTNode* make_program(ASTNode** statements, int count);
@@ -72,6 +97,7 @@ ASTNode* make_var_decl(char* name, ASTNode* value);
 ASTNode* make_var_assign(char* name, ASTNode* value);
 ASTNode* make_var_ref(char* name);
 
+ASTNode* parse_comparison(Parser* p);
 ASTNode* parse_addsub(Parser* p);
 ASTNode* parse_primary(Parser* p);
 ASTNode* parse_unary(Parser* p);
