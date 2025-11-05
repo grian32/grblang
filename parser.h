@@ -17,8 +17,19 @@ typedef enum {
 
 typedef enum {
     VALUE_INT,
-    VALUE_BOOL
+    VALUE_BOOL,
+    VALUE_UNKNOWN,
 } VarType;
+
+char* var_type_string(VarType type);
+
+// basically purely used in resolver for the type checker
+typedef struct {
+    union {
+        int int_val;
+        bool bool_val;
+    };
+} VarValue;
 
 typedef struct ASTNode {
     ASTNodeType type;
@@ -67,10 +78,12 @@ typedef struct {
     int pos;
 } Parser;
 
+VarType get_expr_type_ast(ASTNode* node);
+
 void parser_init(Parser* p, Lexer* l);
 void parser_next(Parser* p);
 
-void op_string(TokenType op, char buffer[2]);
+char* op_string(TokenType op);
 void print_ast(ASTNode* node, int indent, bool newline);
 
 ASTNode* make_int(int value);

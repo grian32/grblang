@@ -1,4 +1,5 @@
 #include "resolver.h"
+#include "parser.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -82,6 +83,7 @@ void resolve(ASTNode* node, Resolver* r) {
                 fprintf(stderr, "undefined variable `%s` when trying to reference", node->var_assign.name);
                 exit(1);
             }
+            node->var_type = r->types[node->var_ref.slot];
             break;
         case AST_PROGRAM:
             for (int i = 0; i < node->program.count; i++) {
