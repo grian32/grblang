@@ -359,6 +359,11 @@ ASTNode* parse_statement(Parser *p) {
             }
             VarType var_type = tok_to_var_type(p->curr.type);
             parser_next(p);
+            if (p->curr.type != TOK_ASSIGN) {
+                fprintf(stderr, "expected equals after type in var declaration\n");
+                exit(1);
+            }
+            parser_next(p);
             ASTNode* val = parse_expr(p);
             return make_var_decl(name, val, var_type);
         } else {
