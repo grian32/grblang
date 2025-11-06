@@ -130,24 +130,26 @@ TokenType lex_parse_ident(Lexer* l, char** ident_out, const char** start_out, in
     if (start_out) *start_out = start;
     if (len_out) *len_out = i;
 
-    if (strcmp(ident_str, "var") == 0) {
-        return TOK_VAR;
-    }
+    switch (strlen(ident_str)) {
+        case 3:
+            if (strcmp(ident_str, "var") == 0) {
+                return TOK_VAR;
+            }
+            if (strcmp(ident_str, "int") == 0) {
+                return TOK_INT_TYPE;
+            }
+        case 4:
+            if (strcmp(ident_str, "true") == 0) {
+                return TOK_TRUE;
+            }
 
-    if (strcmp(ident_str, "true") == 0) {
-        return TOK_TRUE;
-    }
-
-    if (strcmp(ident_str, "int") == 0) {
-        return TOK_INT_TYPE;
-    }
-
-    if (strcmp(ident_str, "bool") == 0) {
-        return TOK_BOOL_TYPE;
-    }
-
-    if (strcmp(ident_str, "false") == 0) {
-        return TOK_FALSE;
+            if (strcmp(ident_str, "bool") == 0) {
+                return TOK_BOOL_TYPE;
+            }
+        case 5:
+            if (strcmp(ident_str, "false") == 0) {
+                return TOK_FALSE;
+            }
     }
 
     if (ident_out) *ident_out = strdup(ident_str);
