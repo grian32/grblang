@@ -24,6 +24,8 @@ typedef enum {
     TOK_LESS, // <
     TOK_GREATER, // >
     TOK_COLON, // :
+    TOK_LBRACE, // {
+    TOK_RBRACE, // }
     TOK_IDENT,
     TOK_EQUALS,
     TOK_VAR, // var
@@ -32,6 +34,8 @@ typedef enum {
     TOK_INT,
     TOK_INT_TYPE,
     TOK_BOOL_TYPE,
+    TOK_IF,
+    TOK_ELSE,
     TOK_EOF
 } TokenType;
 

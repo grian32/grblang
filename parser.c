@@ -127,6 +127,24 @@ void print_ast(ASTNode* node, int indent, bool newline) {
                 print_ast(node->program.statements[i], indent+1, true);
             }
             break;
+        case AST_IF:
+            printf("AST_IF(condition=");
+            print_ast(node->if_stmt.condition, indent, false);
+            printf(", success=");
+            for (int i = 0; node->if_stmt.success_count; i++) {
+                print_ast(node->if_stmt.success_statements[i], indent+1, true);
+            }
+            printf(", fail=");
+            if (node->if_stmt.fail_statements) {
+                for (int i = 0; node->if_stmt.fail_count; i++) {
+                    print_ast(node->if_stmt.fail_statements[i], indent+1, true);
+                }
+            }
+            printf(")");
+            if (newline) {
+                printf("\n");
+            }
+            break;
         case AST_VAR_ASSIGN:
             printf("AST_VAR_ASSIGN(slot=%d,%s=", node->var_assign.slot, node->var_assign.name);
             print_ast(node->var_assign.value, 0, false);
@@ -383,13 +401,25 @@ ASTNode* parse_statement(Parser *p) {
         return make_var_assign(name, val);
     }
 
+    if (p->curr.type == TOK_IF) {
+        return parse_if_stmt(p);
+    }
+
     return parse_expr(p);
 }
 
 ASTNode* parse_program(Parser *p) {
     int capacity = 128, count = 0;
-    ASTNode** statements = malloc(sizeof(ASTNode*) * capacity);
+    ASTNode** statements;
+    parse_block(p, capacity, TOK_EOF, &statements, &count);
 
+    return make_program(statements, count);
+}
+
+void parse_block(Parser* p, int initial_capacity, TokenType end_tok, ASTNode*** statements_out, int* count_out) {
+    int count = 0;
+    int capacity = initial_capacity;
+    ASTNode** statements = malloc(sizeof(ASTNode*) * capacity);
     while (p->curr.type != TOK_EOF) {
         if (count >= capacity) {
             capacity *= 2;
@@ -409,5 +439,19 @@ ASTNode* parse_program(Parser *p) {
         parser_next(p);
     }
 
-    return make_program(statements, count);
+    *statements_out = statements;
+    *count_out = count;
+}
+
+ASTNode* parse_if_stmt(Parser* p) {
+    parser_next(p);
+    ASTNode* condition = parse_expr(p);
+    if (p->curr.type != TOK_LBRACE) {
+        fprintf(stderr, "expected lbrace after if statement condition expression\n");
+        exit(1);
+    }
+    parser_next(p);
+    int success_capacity = 128, success_count = 0;
+    ASTNode** success_statements;
+    parse_block(p, success_capacity, TOK_RBRACE, &success_statements, &success_count);
 }

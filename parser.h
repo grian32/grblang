@@ -10,6 +10,7 @@ typedef enum {
     AST_BINARY_OP,
     AST_UNARY_OP,
     AST_PROGRAM,
+    AST_IF,
     AST_VAR_DECL,
     AST_VAR_ASSIGN,
     AST_VAR_REF,
@@ -69,6 +70,14 @@ typedef struct ASTNode {
             char* name;
             int slot;
         } var_ref;
+
+        struct {
+            struct ASTNode* condition;
+            struct ASTNode** success_statements;
+            int success_count;
+            struct ASTNode** fail_statements;
+            int fail_count;
+        } if_stmt;
     };
 } ASTNode;
 
@@ -96,6 +105,7 @@ ASTNode* make_false_bool();
 ASTNode* make_binary_op(TokenType op, ASTNode* left, ASTNode* right);
 ASTNode* make_unary_op(TokenType op, ASTNode* right);
 ASTNode* make_program(ASTNode** statements, int count);
+ASTNode* make_if_statement(ASTNode* condition, ASTNode** success_statements, int success_count, ASTNode** fail_statements, int fail_count);
 ASTNode* make_var_decl(char* name, ASTNode* value, VarType type);
 ASTNode* make_var_assign(char* name, ASTNode* value);
 ASTNode* make_var_ref(char* name);
@@ -106,11 +116,15 @@ ASTNode* parse_primary(Parser* p);
 ASTNode* parse_unary(Parser* p);
 ASTNode* parse_muldiv(Parser* p);
 
+// assumes p.curr == tok_if on call
+ASTNode* parse_if_stmt(Parser* p);
+
 /**
- * = parse_addsub; to be used as a top-level entry point for parsing expression
+ * = highest precendence parse; to be used as a top-level entry point for parsing expression
  */
 ASTNode* parse_expr(Parser* p);
 ASTNode* parse_statement(Parser *p);
+void parse_block(Parser* p, int initial_capacity, TokenType end_tok, ASTNode*** statements_out, int* count_out);
 // to be used as a general entry point
 ASTNode* parse_program(Parser *p);
 

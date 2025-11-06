@@ -20,7 +20,7 @@ void print_lexer(Lexer* l) {
 
     char buffer[50];
     token_string(next, buffer);
-    printf("%s ", buffer);
+    printf("%s\n", buffer);
 }
 
 int main(void) {
@@ -38,19 +38,21 @@ int main(void) {
     resolver_init(&r);
     resolve(node, &r);
 
-    type_check(node, &r);
+    print_ast(node, 0, true);
 
-    BytecodeEmitter b;
-    bytecode_init(&b);
-    bytecode_gen(node, &b);
+    // type_check(node, &r);
 
-    VM vm;
-    vm_init(&vm, &b, r.count);
-    vm_run(&vm);
+    // BytecodeEmitter b;
+    // bytecode_init(&b);
+    // bytecode_gen(node, &b);
 
-    char buffer[50];
-    stack_value_string(vm.stack.data[vm.stack.top], buffer);
-    printf("vm result: %s\n", buffer);
+    // VM vm;
+    // vm_init(&vm, &b, r.count);
+    // vm_run(&vm);
+
+    // char buffer[50];
+    // stack_value_string(vm.stack.data[vm.stack.top], buffer);
+    // printf("vm result: %s\n", buffer);
 
     return 0;
 }

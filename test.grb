@@ -5,4 +5,8 @@ y = 6;
 
 var n: bool = y == 6;
 
-n == true;
+if n {
+    3;
+} else {
+    4;
+}

@@ -65,6 +65,27 @@ void token_string(Token t, char buffer[50]) {
         case TOK_EQUALS:
             sprintf(buffer, "EQUALS(@%d)", t.length);
             break;
+        case TOK_LBRACE:
+            sprintf(buffer, "LBRACE(@%d)", t.length);
+            break;
+        case TOK_RBRACE:
+            sprintf(buffer, "RBRACE(@%d)", t.length);
+            break;
+        case TOK_COLON:
+            sprintf(buffer, "COLON(@%d)", t.length);
+            break;
+        case TOK_INT_TYPE:
+            sprintf(buffer, "INT_TYPE(@%d)", t.length);
+            break;
+        case TOK_BOOL_TYPE:
+            sprintf(buffer, "BOOL_TYPE(@%d)", t.length);
+            break;
+        case TOK_IF:
+            sprintf(buffer, "IF(@%d)", t.length);
+            break;
+        case TOK_ELSE:
+            sprintf(buffer, "ELSE(@%d)", t.length);
+            break;
         default:
             sprintf(buffer, "UNKNOWN");
     }
@@ -131,6 +152,10 @@ TokenType lex_parse_ident(Lexer* l, char** ident_out, const char** start_out, in
     if (len_out) *len_out = i;
 
     switch (strlen(ident_str)) {
+        case 2:
+            if (strcmp(ident_str, "if") == 0) {
+                return TOK_IF;
+            }
         case 3:
             if (strcmp(ident_str, "var") == 0) {
                 return TOK_VAR;
@@ -147,6 +172,10 @@ TokenType lex_parse_ident(Lexer* l, char** ident_out, const char** start_out, in
 
             if (strcmp(ident_str, "bool") == 0) {
                 return TOK_BOOL_TYPE;
+            }
+
+            if (strcmp(ident_str, "else") == 0) {
+                return TOK_ELSE;
             }
             break;
         case 5:
@@ -212,6 +241,12 @@ Token lex_next(Lexer* l) {
             break;
         case ':':
             t.type = TOK_COLON;
+            break;
+        case '{':
+            t.type = TOK_LBRACE;
+            break;
+        case '}':
+            t.type = TOK_RBRACE;
             break;
         case '\0':
             t.type = TOK_EOF;
