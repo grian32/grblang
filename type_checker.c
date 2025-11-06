@@ -110,10 +110,21 @@ void type_check(ASTNode *node, Resolver* r) {
             type_check(node->program.statements[i], r);
         }
         break;
-    case AST_VAR_DECL:
+    case AST_VAR_DECL: {
         type_check(node->var_decl.value, r);
+        VarType var_type = node->var_type;
+        VarType value_type = get_expr_type(node->var_decl.value, r);
+        if (var_type != value_type) {
+            fprintf(stderr, "error: cannot assign %s to variable `%s` that was explicitly declared as type %s\n",
+                var_type_string(value_type),
+                node->var_decl.name,
+                var_type_string(var_type)
+            );
+            exit(1);
+        }
         break;
-    case AST_VAR_ASSIGN:
+    }
+    case AST_VAR_ASSIGN: {
         type_check(node->var_assign.value, r);
         VarType var_type = node->var_type;
         VarType value_type = get_expr_type(node->var_assign.value, r);
@@ -126,6 +137,7 @@ void type_check(ASTNode *node, Resolver* r) {
             exit(1);
         }
         break;
+    }
     default:
         break;
     }

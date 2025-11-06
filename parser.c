@@ -370,11 +370,6 @@ ASTNode* parse_statement(Parser *p) {
             fprintf(stderr, "expected equals or type declaration after identifer in var declaration\n");
             exit(1);
         }
-
-        // parser_next(p);
-
-        // ASTNode* val = parse_expr(p);
-        // return make_var_decl(name, val, TOK_UNKNOWN);
     }
 
     if (p->curr.type == TOK_IDENT && p->peek.type == TOK_ASSIGN) {
