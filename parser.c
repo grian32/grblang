@@ -216,8 +216,10 @@ ASTNode* make_var_decl(char* name, ASTNode* value, VarType type) {
 
     if (type != VALUE_UNKNOWN) {
         node->var_type = type;
+        node->var_decl.type_inferred = false;
     } else {
         node->var_type = get_expr_type_ast(node->var_decl.value);
+        node->var_decl.type_inferred = true;
     }
 
     return node;

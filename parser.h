@@ -58,6 +58,7 @@ typedef struct ASTNode {
             char* name;
             struct ASTNode* value;
             int slot;
+            bool type_inferred;
         } var_decl;
         struct {
             char* name;
