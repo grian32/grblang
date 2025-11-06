@@ -369,7 +369,7 @@ ASTNode* parse_statement(Parser *p) {
             ASTNode* val = parse_expr(p);
             return make_var_decl(name, val, var_type);
         } else {
-            fprintf(stderr, "expected equals or type declaration after identifer in var declaration\n");
+            fprintf(stderr, "expected equals or type declaration after identifier in var declaration\n");
             exit(1);
         }
     }
