@@ -23,12 +23,15 @@ typedef enum {
     TOK_EXCLAM, // !
     TOK_LESS, // <
     TOK_GREATER, // >
+    TOK_COLON, // :
     TOK_IDENT,
     TOK_EQUALS,
     TOK_VAR, // var
     TOK_TRUE, // true
     TOK_FALSE, // false
     TOK_INT,
+    TOK_INT_TYPE,
+    TOK_BOOL_TYPE,
     TOK_EOF
 } TokenType;
 

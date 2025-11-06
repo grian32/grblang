@@ -1,8 +1,8 @@
-var x = 3;
+var x: int = 3;
 
 var y = 5;
 y = 6;
 
-var n = y == 6;
+var n: bool = y == 6;
 
-n = 7;
+n == true;

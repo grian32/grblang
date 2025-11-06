@@ -138,6 +138,14 @@ TokenType lex_parse_ident(Lexer* l, char** ident_out, const char** start_out, in
         return TOK_TRUE;
     }
 
+    if (strcmp(ident_str, "int") == 0) {
+        return TOK_INT_TYPE;
+    }
+
+    if (strcmp(ident_str, "bool") == 0) {
+        return TOK_BOOL_TYPE;
+    }
+
     if (strcmp(ident_str, "false") == 0) {
         return TOK_FALSE;
     }
@@ -194,6 +202,9 @@ Token lex_next(Lexer* l) {
             break;
         case '>':
             t.type = TOK_GREATER;
+            break;
+        case ':':
+            t.type = TOK_COLON;
             break;
         case '\0':
             t.type = TOK_EOF;
