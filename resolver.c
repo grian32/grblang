@@ -91,6 +91,17 @@ void resolve(ASTNode* node, Resolver* r) {
                 resolve(node->program.statements[i], r);
             }
             break;
+        case AST_IF:
+            resolve(node->if_stmt.condition, r);
+            for (int i = 0; i < node->if_stmt.success_count; i++) {
+                resolve(node->if_stmt.success_statements[i], r);
+            }
+            if (node->if_stmt.fail_statements) {
+                for (int i = 0; i < node->if_stmt.fail_count; i++) {
+                    resolve(node->if_stmt.fail_statements[i], r);
+                }
+            }
+            break;
         case AST_BINARY_OP:
             resolve(node->binary_op.left, r);
             resolve(node->binary_op.right, r);
