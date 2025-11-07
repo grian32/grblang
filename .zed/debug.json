@@ -1,0 +1,13 @@
+[
+  {
+    "label": "Debug native binary",
+    "build": {
+      "command": "~/cmake-4.1.2-linux-x86_64/bin/cmake",
+      "args": ["--build", "cmake-build"],
+      "cwd": "$ZED_WORKTREE_ROOT"
+    },
+    "program": "$ZED_WORKTREE_ROOT/cmake-build/grblang",
+    "request": "launch",
+    "adapter": "GDB"
+  }
+]
