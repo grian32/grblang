@@ -142,6 +142,27 @@ void type_check(ASTNode *node, Resolver* r) {
         }
         break;
     }
+    case AST_IF: {
+        type_check(node->if_stmt.condition, r);
+        VarType condition_type = get_expr_type(node->if_stmt.condition, r);
+
+        if (condition_type != VALUE_BOOL) {
+            fprintf(stderr, "error: cannot use a non-bool as if condition\n");
+            exit(1);
+        }
+
+        for (int i = 0; i < node->if_stmt.success_count; i++) {
+            type_check(node->if_stmt.success_statements[i], r);
+        }
+
+        if (node->if_stmt.fail_statements) {
+            for (int i = 0; i < node->if_stmt.fail_count; i++) {
+                type_check(node->if_stmt.fail_statements[i], r);
+            }
+        }
+
+        break;
+    }
     default:
         break;
     }
