@@ -107,7 +107,7 @@ void resolve(ASTNode* node, Resolver* r) {
             resolve(node->binary_op.right, r);
             break;
         case AST_UNARY_OP:
-            resolve(node->binary_op.right, r);
+            resolve(node->unary_op.right, r);
             break;
     }
 }

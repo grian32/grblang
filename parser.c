@@ -62,6 +62,7 @@ void parser_next(Parser* p) {
 char* op_string(TokenType op) {
     switch (op) {
         case TOK_EQUALS: return "==";
+        case TOK_NOT_EQUALS: return "!=";
         case TOK_GREATER: return ">";
         case TOK_LESS: return "<";
         case TOK_DIV: return "/";
@@ -152,7 +153,7 @@ void print_ast(ASTNode* node, int indent, bool newline) {
         case AST_VAR_ASSIGN:
             printf("AST_VAR_ASSIGN(slot=%d,%s=", node->var_assign.slot, node->var_assign.name);
             print_ast(node->var_assign.value, 0, false);
-            printf(";t=%s)", var_type_string(node->var_type));
+            printf(";t=%s(%d))", var_type_string(node->var_type), node->var_type);
             if (newline) {
                 printf("\n");
             }
@@ -160,13 +161,13 @@ void print_ast(ASTNode* node, int indent, bool newline) {
         case AST_VAR_DECL:
             printf("AST_VAR_DECL(slot=%d,%s=", node->var_assign.slot,node->var_decl.name);
             print_ast(node->var_decl.value, 0, false);
-            printf(";t=%s)", var_type_string(node->var_type));
+            printf(";t=%s(%d))", var_type_string(node->var_type), node->var_type);
             if (newline) {
                 printf("\n");
             }
             break;
         case AST_VAR_REF:
-            printf("AST_VAR_REF(slot=%d,%s;t=%s)", node->var_ref.slot, node->var_ref.name, var_type_string(node->var_type));
+            printf("AST_VAR_REF(slot=%d,%s;t=%s(%d))", node->var_ref.slot, node->var_ref.name, var_type_string(node->var_type), node->var_type);
             if (newline) {
                 printf("\n");
             }
