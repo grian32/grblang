@@ -307,7 +307,7 @@ ASTNode* parse_primary(Parser* p) {
 
     if (p->curr.type == TOK_LPAREN) {
         parser_next(p);
-        ASTNode* expr = parse_addsub(p);
+        ASTNode* expr = parse_expr(p);
         if (p->curr.type != TOK_RPAREN) {
             fprintf(stderr, "unexpected token (likely unmatched parens) in parse_primary\n");
             exit(1);
