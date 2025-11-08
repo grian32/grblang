@@ -14,7 +14,7 @@ VarType get_expr_type_ast(ASTNode* node) {
             return VALUE_BOOL;
         case AST_BINARY_OP: {
             TokenType op = node->binary_op.op;
-            if (op == TOK_PLUS || op == TOK_MINUS || op == TOK_MULT || op == TOK_DIV) {
+            if (op == TOK_PLUS || op == TOK_MINUS || op == TOK_MULT || op == TOK_DIV || op == TOK_MODULO) {
                 return VALUE_INT;
             } else if (op == TOK_LESS || op == TOK_GREATER || op == TOK_EQUALS) {
                 return VALUE_BOOL;
@@ -69,6 +69,7 @@ char* op_string(TokenType op) {
         case TOK_MULT: return "*";
         case TOK_PLUS: return "+";
         case TOK_MINUS: return "-";
+        case TOK_MODULO: return "%";
 
         default: return "";
     }
@@ -348,7 +349,7 @@ ASTNode* parse_comparison(Parser* p) {
 ASTNode* parse_muldiv(Parser* p) {
     ASTNode* left = parse_unary(p);
 
-    while (p->curr.type == TOK_MULT || p->curr.type == TOK_DIV) {
+    while (p->curr.type == TOK_MULT || p->curr.type == TOK_DIV || p->curr.type == TOK_MODULO) {
         TokenType op = p->curr.type;
         parser_next(p);
         ASTNode* right = parse_unary(p);

@@ -27,6 +27,7 @@ typedef enum {
     OP_IGT,
     OP_ILT,
     OP_IEQ,
+    OP_IMOD,
     OP_BEQ,
     OP_INEQ,
     OP_BNEQ,
@@ -73,6 +74,8 @@ void emit_not(BytecodeEmitter* b);
 
 int emit_jmpn(BytecodeEmitter* b, int steps);
 int emit_jmp(BytecodeEmitter* b, int steps);
+
+void emit_imod(BytecodeEmitter* b);
 
 void patch_int(BytecodeEmitter* b, int new_value, int starts_at);
 

@@ -61,6 +61,7 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b) {
                 case TOK_DIV: emit_idiv(b); break;
                 case TOK_GREATER: emit_igt(b); break;
                 case TOK_LESS: emit_ilt(b); break;
+                case TOK_MODULO: emit_imod(b); break;
                 case TOK_EQUALS: {
                     // can just check the left node as type checker should catch cases where it's not the same type on both sides
                     if (node->binary_op.left->type == AST_INT) {
@@ -253,6 +254,10 @@ int emit_jmp(BytecodeEmitter* b, int steps) {
     emit_byte(b, (steps>> 8) & 0xFF);
     emit_byte(b, steps & 0xFF);
     return idx;
+}
+
+void emit_imod(BytecodeEmitter* b) {
+    emit_byte(b, OP_IMOD);
 }
 
 void patch_int(BytecodeEmitter* b, int new_val, int starts_at) {

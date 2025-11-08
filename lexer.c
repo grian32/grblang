@@ -256,6 +256,9 @@ Token lex_next(Lexer* l) {
         case '}':
             t.type = TOK_RBRACE;
             break;
+        case '%':
+            t.type = TOK_MODULO;
+            break;
         case '\0':
             t.type = TOK_EOF;
             t.length = 0;

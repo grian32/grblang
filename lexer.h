@@ -26,6 +26,7 @@ typedef enum {
     TOK_COLON, // :
     TOK_LBRACE, // {
     TOK_RBRACE, // }
+    TOK_MODULO, // %
     TOK_IDENT,
     TOK_EQUALS, // ==
     TOK_NOT_EQUALS, // !=

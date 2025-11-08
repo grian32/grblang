@@ -1,5 +1,6 @@
 #include "vm.h"
 #include "bytecode_emit.h"
+#include "parser.h"
 #include "stack.h"
 
 #include <stdio.h>
@@ -82,6 +83,13 @@ void vm_run(VM* vm) {
                 StackValue b = stack_pop(&vm->stack);
                 StackValue a = stack_pop(&vm->stack);
                 StackValue sv = {.type = VALUE_BOOL, .bool_val = a.int_val < b.int_val};
+                stack_push(&vm->stack, sv);
+                break;
+            }
+            case OP_IMOD: {
+                StackValue b = stack_pop(&vm->stack);
+                StackValue a = stack_pop(&vm->stack);
+                StackValue sv = {.type = VALUE_INT, .int_val = a.int_val % b.int_val};
                 stack_push(&vm->stack, sv);
                 break;
             }
