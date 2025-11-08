@@ -27,7 +27,8 @@ typedef enum {
     TOK_LBRACE, // {
     TOK_RBRACE, // }
     TOK_IDENT,
-    TOK_EQUALS,
+    TOK_EQUALS, // ==
+    TOK_NOT_EQUALS, // !=
     TOK_VAR, // var
     TOK_TRUE, // true
     TOK_FALSE, // false

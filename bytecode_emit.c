@@ -1,4 +1,5 @@
 #include "bytecode_emit.h"
+#include "lexer.h"
 #include "parser.h"
 
 #include <stdio.h>
@@ -66,6 +67,14 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b) {
                         emit_ieq(b);
                     } else {
                         emit_beq(b);
+                    }
+                    break;
+                }
+                case TOK_NOT_EQUALS: {
+                    if (node->binary_op.left->type == AST_INT) {
+                        emit_ineq(b);
+                    } else {
+                        emit_bneq(b);
                     }
                     break;
                 }
@@ -210,6 +219,14 @@ void emit_ieq(BytecodeEmitter* b) {
 
 void emit_beq(BytecodeEmitter* b) {
     emit_byte(b, OP_BEQ);
+}
+
+void emit_ineq(BytecodeEmitter* b) {
+    emit_byte(b, OP_INEQ);
+}
+
+void emit_bneq(BytecodeEmitter* b) {
+    emit_byte(b, OP_BNEQ);
 }
 
 void emit_neg(BytecodeEmitter* b) {

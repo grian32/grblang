@@ -17,7 +17,7 @@ VarType get_expr_type(ASTNode* node, Resolver* r) {
             TokenType op = node->binary_op.op;
             if (op == TOK_PLUS || op == TOK_MINUS || op == TOK_MULT || op == TOK_DIV) {
                 return VALUE_INT;
-            } else if (op == TOK_LESS || op == TOK_GREATER || op == TOK_EQUALS) {
+            } else if (op == TOK_LESS || op == TOK_GREATER || op == TOK_EQUALS || op == TOK_NOT_EQUALS) {
                 return VALUE_BOOL;
             }
             return VALUE_UNKNOWN;
@@ -70,6 +70,7 @@ void type_check(ASTNode *node, Resolver* r) {
                     exit(1);
                 }
                 break;
+            case TOK_NOT_EQUALS:
             case TOK_EQUALS:
                 if (
                     (left_type != VALUE_BOOL || right_type != VALUE_BOOL) &&

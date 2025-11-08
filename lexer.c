@@ -232,7 +232,15 @@ Token lex_next(Lexer* l) {
             break;
         case '!':
             t.type = TOK_EXCLAM;
-            break;
+            lex_advance(l);
+
+            if (l->current == '=') {
+                t.type = TOK_NOT_EQUALS;
+                t.length++;
+                lex_advance(l);
+            }
+
+            return t;
         case '<':
             t.type = TOK_LESS;
             break;

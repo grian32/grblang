@@ -334,7 +334,7 @@ ASTNode* parse_unary(Parser* p) {
 
 ASTNode* parse_comparison(Parser* p) {
     ASTNode* left = parse_addsub(p);
-    if (p->curr.type == TOK_LESS || p->curr.type == TOK_GREATER || p->curr.type == TOK_EQUALS) {
+    if (p->curr.type == TOK_LESS || p->curr.type == TOK_GREATER || p->curr.type == TOK_EQUALS || p->curr.type == TOK_NOT_EQUALS) {
         TokenType op = p->curr.type;
         parser_next(p);
         ASTNode* right = parse_addsub(p);
