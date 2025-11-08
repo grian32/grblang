@@ -63,6 +63,10 @@ void vm_run(VM* vm) {
             case OP_IDIV: {
                 StackValue b = stack_pop(&vm->stack);
                 StackValue a = stack_pop(&vm->stack);
+                if (b.int_val == 0) {
+                    fprintf(stderr, "error: division by 0 not allowed\n");
+                    exit(1);
+                }
                 StackValue sv = {.type = VALUE_INT, .int_val = a.int_val / b.int_val};
                 stack_push(&vm->stack, sv);
                 break;

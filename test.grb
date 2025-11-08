@@ -1,7 +1,7 @@
 var x: int = 3;
 
 var y = 5;
-y = 6;
+y = 6 / 1;
 
 var n: bool = y == 6;
 
