@@ -33,6 +33,8 @@ typedef enum {
     OP_BSTORE, // bool
     OP_BLOAD,
     OP_NOT,
+    OP_JMPN,
+    OP_JMP
 } BytecodeOp;
 
 void bytecode_init(BytecodeEmitter* b);
@@ -64,5 +66,10 @@ void emit_beq(BytecodeEmitter* b);
 
 void emit_neg(BytecodeEmitter* b);
 void emit_not(BytecodeEmitter* b);
+
+int emit_jmpn(BytecodeEmitter* b, int steps);
+int emit_jmp(BytecodeEmitter* b, int steps);
+
+void patch_int(BytecodeEmitter* b, int new_value, int starts_at);
 
 #endif //GRBLANG_BYTECODE_EMIT_H

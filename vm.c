@@ -1,4 +1,6 @@
 #include "vm.h"
+#include "bytecode_emit.h"
+#include "stack.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -126,7 +128,20 @@ void vm_run(VM* vm) {
                 vm->locals[slot] = stack_pop(&vm->stack);
                 break;
             }
-
+            case OP_JMP: {
+                int steps = (vm->code[vm->pc] << 8 | vm->code[vm->pc + 1]);
+                vm->pc += steps + 2; // steps and then the 2 for the actual step amount
+                break;
+            }
+            case OP_JMPN: {
+                int steps = (vm->code[vm->pc] << 8 | vm->code[vm->pc + 1]);
+                vm->pc += 2;
+                StackValue sv = stack_pop(&vm->stack);
+                if (!sv.bool_val) {
+                    vm->pc += steps;
+                }
+                break;
+            }
             default:
                 fprintf(stderr, "unknown opcode: %d\n", instruction);
                 exit(1);

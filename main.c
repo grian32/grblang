@@ -40,19 +40,19 @@ int main(void) {
 
     print_ast(node, 0, true);
 
-    // type_check(node, &r);
+    type_check(node, &r);
 
-    // BytecodeEmitter b;
-    // bytecode_init(&b);
-    // bytecode_gen(node, &b);
+    BytecodeEmitter b;
+    bytecode_init(&b);
+    bytecode_gen(node, &b);
 
-    // VM vm;
-    // vm_init(&vm, &b, r.count);
-    // vm_run(&vm);
+    VM vm;
+    vm_init(&vm, &b, r.count);
+    vm_run(&vm);
 
-    // char buffer[50];
-    // stack_value_string(vm.stack.data[vm.stack.top], buffer);
-    // printf("vm result: %s\n", buffer);
+    char buffer[50];
+    stack_value_string(vm.stack.data[vm.stack.top], buffer);
+    printf("vm result: %s\n", buffer);
 
     return 0;
 }
