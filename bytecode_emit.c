@@ -51,6 +51,23 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b) {
             emit_push_bool(b, node->bool_val);
             break;
         case AST_BINARY_OP:
+            // need to output left/right differently from all other ops for and and or
+            if (node->binary_op.op == TOK_AND) {
+                bytecode_gen(node->binary_op.left, b);
+                int jmpn_start = emit_jmpn(b, 0);
+                bytecode_gen(node->binary_op.right, b);
+                int jmpn_step_count = b->code_size - (jmpn_start + 2);
+                patch_int(b, jmpn_step_count, jmpn_start);
+                break;
+            } else if (node->binary_op.op == TOK_OR) {
+                bytecode_gen(node->binary_op.left, b);
+                int jmpt_start = emit_jmpt(b, 0);
+                bytecode_gen(node->binary_op.right, b);
+                int jmpt_step_count = b->code_size - (jmpt_start + 2);
+                patch_int(b, jmpt_step_count, jmpt_start);
+                break;
+            }
+
             bytecode_gen(node->binary_op.left, b);
             bytecode_gen(node->binary_op.right, b);
 
@@ -252,7 +269,16 @@ int emit_jmpn(BytecodeEmitter* b, int steps) {
     emit_byte(b, OP_JMPN);
 
     int idx = b->code_size;
-    emit_byte(b, (steps>> 8) & 0xFF);
+    emit_byte(b, (steps >> 8) & 0xFF);
+    emit_byte(b, steps & 0xFF);
+    return idx;
+}
+
+int emit_jmpt(BytecodeEmitter* b, int steps) {
+    emit_byte(b, OP_JMPT);
+
+    int idx = b->code_size;
+    emit_byte(b, (steps >> 8) & 0xFF);
     emit_byte(b, steps & 0xFF);
     return idx;
 }
@@ -261,7 +287,7 @@ int emit_jmp(BytecodeEmitter* b, int steps) {
     emit_byte(b, OP_JMP);
 
     int idx = b->code_size;
-    emit_byte(b, (steps>> 8) & 0xFF);
+    emit_byte(b, (steps >> 8) & 0xFF);
     emit_byte(b, steps & 0xFF);
     return idx;
 }

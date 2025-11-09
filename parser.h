@@ -110,6 +110,8 @@ ASTNode* make_var_decl(char* name, ASTNode* value, VarType type);
 ASTNode* make_var_assign(char* name, ASTNode* value);
 ASTNode* make_var_ref(char* name);
 
+ASTNode* parse_logical_or(Parser* p);
+ASTNode* parse_logical_and(Parser* p);
 ASTNode* parse_comparison(Parser* p);
 ASTNode* parse_addsub(Parser* p);
 ASTNode* parse_primary(Parser* p);

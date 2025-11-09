@@ -39,6 +39,7 @@ typedef enum {
     OP_BLOAD,
     OP_NOT,
     OP_JMPN,
+    OP_JMPT,
     OP_JMP
 } BytecodeOp;
 
@@ -77,6 +78,7 @@ void emit_neg(BytecodeEmitter* b);
 void emit_not(BytecodeEmitter* b);
 
 int emit_jmpn(BytecodeEmitter* b, int steps);
+int emit_jmpt(BytecodeEmitter* b, int steps);
 int emit_jmp(BytecodeEmitter* b, int steps);
 
 void emit_imod(BytecodeEmitter* b);

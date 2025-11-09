@@ -180,9 +180,22 @@ void vm_run(VM* vm) {
             case OP_JMPN: {
                 int steps = (vm->code[vm->pc] << 8 | vm->code[vm->pc + 1]);
                 vm->pc += 2;
-                StackValue sv = stack_pop(&vm->stack);
+                StackValue sv = stack_peek(&vm->stack);
                 if (!sv.bool_val) {
                     vm->pc += steps;
+                } else {
+                    stack_pop(&vm->stack);
+                }
+                break;
+            }
+            case OP_JMPT: {
+                int steps = (vm->code[vm->pc] << 8 | vm->code[vm->pc + 1]);
+                vm->pc += 2;
+                StackValue sv = stack_peek(&vm->stack);
+                if (sv.bool_val) {
+                    vm->pc += steps;
+                } else {
+                    stack_pop(&vm->stack);
                 }
                 break;
             }

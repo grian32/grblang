@@ -65,6 +65,10 @@ char* op_string(TokenType op) {
         case TOK_NOT_EQUALS: return "!=";
         case TOK_GREATER: return ">";
         case TOK_LESS: return "<";
+        case TOK_LESS_EQUALS: return "<=";
+        case TOK_GREATER_EQUALS: return ">=";
+        case TOK_AND: return "&&";
+        case TOK_OR: return "||";
         case TOK_DIV: return "/";
         case TOK_MULT: return "*";
         case TOK_PLUS: return "+";
@@ -334,8 +338,33 @@ ASTNode* parse_unary(Parser* p) {
     return parse_primary(p);
 }
 
+ASTNode* parse_logical_or(Parser* p) {
+    ASTNode* left = parse_logical_and(p);
+
+    while (p->curr.type == TOK_OR) {
+        parser_next(p);
+        ASTNode* right = parse_logical_and(p);
+        left = make_binary_op(TOK_OR, left, right);
+    }
+
+    return left;
+}
+
+ASTNode* parse_logical_and(Parser* p) {
+    ASTNode* left = parse_comparison(p);
+
+    while (p->curr.type == TOK_AND) {
+        parser_next(p);
+        ASTNode* right = parse_comparison(p);
+        left = make_binary_op(TOK_AND, left, right);
+    }
+
+    return left;
+}
+
 ASTNode* parse_comparison(Parser* p) {
     ASTNode* left = parse_addsub(p);
+
     if (p->curr.type == TOK_LESS || p->curr.type == TOK_GREATER || p->curr.type == TOK_EQUALS || p->curr.type == TOK_NOT_EQUALS || p->curr.type == TOK_GREATER_EQUALS || p->curr.type == TOK_LESS_EQUALS) {
         TokenType op = p->curr.type;
         parser_next(p);
@@ -373,7 +402,7 @@ ASTNode* parse_addsub(Parser* p) {
 }
 
 ASTNode* parse_expr(Parser* p) {
-    return parse_comparison(p);
+    return parse_logical_or(p);
 }
 
 ASTNode* parse_statement(Parser *p) {

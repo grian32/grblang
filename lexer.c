@@ -275,6 +275,28 @@ Token lex_next(Lexer* l) {
         case '%':
             t.type = TOK_MODULO;
             break;
+        case '&':
+            lex_advance(l);
+            if (l->current != '&') {
+                fprintf(stderr, "error: expected second & after &");
+                exit(1);
+            }
+            t.type = TOK_AND;
+            t.length++;
+            lex_advance(l);
+
+            return t;
+        case '|':
+            lex_advance(l);
+            if (l->current != '|') {
+                fprintf(stderr, "error: expected second | after |");
+                exit(1);
+            }
+            t.type = TOK_OR;
+            t.length++;
+            lex_advance(l);
+
+            return t;
         case '\0':
             t.type = TOK_EOF;
             t.length = 0;
