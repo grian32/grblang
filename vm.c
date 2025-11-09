@@ -79,10 +79,24 @@ void vm_run(VM* vm) {
                 stack_push(&vm->stack, sv);
                 break;
             }
+            case OP_IGTE: {
+                StackValue b = stack_pop(&vm->stack);
+                StackValue a = stack_pop(&vm->stack);
+                StackValue sv = {.type = VALUE_BOOL, .bool_val = a.int_val >= b.int_val};
+                stack_push(&vm->stack, sv);
+                break;
+            }
             case OP_ILT: {
                 StackValue b = stack_pop(&vm->stack);
                 StackValue a = stack_pop(&vm->stack);
                 StackValue sv = {.type = VALUE_BOOL, .bool_val = a.int_val < b.int_val};
+                stack_push(&vm->stack, sv);
+                break;
+            }
+            case OP_ILTE: {
+                StackValue b = stack_pop(&vm->stack);
+                StackValue a = stack_pop(&vm->stack);
+                StackValue sv = {.type = VALUE_BOOL, .bool_val = a.int_val <= b.int_val};
                 stack_push(&vm->stack, sv);
                 break;
             }

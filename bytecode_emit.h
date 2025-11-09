@@ -25,7 +25,9 @@ typedef enum {
     OP_IDIV,
     OP_INEG,
     OP_IGT,
+    OP_IGTE,
     OP_ILT,
+    OP_ILTE,
     OP_IEQ,
     OP_IMOD,
     OP_BEQ,
@@ -62,7 +64,9 @@ void emit_imul(BytecodeEmitter* b);
 void emit_idiv(BytecodeEmitter* b);
 
 void emit_igt(BytecodeEmitter* b);
+void emit_igte(BytecodeEmitter* b);
 void emit_ilt(BytecodeEmitter* b);
+void emit_ilte(BytecodeEmitter* b);
 void emit_ieq(BytecodeEmitter* b);
 void emit_ineq(BytecodeEmitter* b);
 

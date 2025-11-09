@@ -243,10 +243,26 @@ Token lex_next(Lexer* l) {
             return t;
         case '<':
             t.type = TOK_LESS;
-            break;
+            lex_advance(l);
+
+            if (l->current == '=') {
+                t.type = TOK_LESS_EQUALS;
+                t.length++;
+                lex_advance(l);
+            }
+
+            return t;
         case '>':
             t.type = TOK_GREATER;
-            break;
+            lex_advance(l);
+
+            if (l->current == '=') {
+                t.type = TOK_GREATER_EQUALS;
+                t.length++;
+                lex_advance(l);
+            }
+
+            return t;
         case ':':
             t.type = TOK_COLON;
             break;

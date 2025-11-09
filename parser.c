@@ -16,7 +16,7 @@ VarType get_expr_type_ast(ASTNode* node) {
             TokenType op = node->binary_op.op;
             if (op == TOK_PLUS || op == TOK_MINUS || op == TOK_MULT || op == TOK_DIV || op == TOK_MODULO) {
                 return VALUE_INT;
-            } else if (op == TOK_LESS || op == TOK_GREATER || op == TOK_EQUALS) {
+            } else if (op == TOK_LESS || op == TOK_GREATER || op == TOK_EQUALS || op == TOK_NOT_EQUALS || op == TOK_GREATER_EQUALS || op == TOK_LESS_EQUALS) {
                 return VALUE_BOOL;
             }
             return VALUE_UNKNOWN;
@@ -336,7 +336,7 @@ ASTNode* parse_unary(Parser* p) {
 
 ASTNode* parse_comparison(Parser* p) {
     ASTNode* left = parse_addsub(p);
-    if (p->curr.type == TOK_LESS || p->curr.type == TOK_GREATER || p->curr.type == TOK_EQUALS || p->curr.type == TOK_NOT_EQUALS) {
+    if (p->curr.type == TOK_LESS || p->curr.type == TOK_GREATER || p->curr.type == TOK_EQUALS || p->curr.type == TOK_NOT_EQUALS || p->curr.type == TOK_GREATER_EQUALS || p->curr.type == TOK_LESS_EQUALS) {
         TokenType op = p->curr.type;
         parser_next(p);
         ASTNode* right = parse_addsub(p);

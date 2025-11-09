@@ -17,7 +17,7 @@ VarType get_expr_type(ASTNode* node, Resolver* r) {
             TokenType op = node->binary_op.op;
             if (op == TOK_PLUS || op == TOK_MINUS || op == TOK_MULT || op == TOK_DIV || op == TOK_MODULO) {
                 return VALUE_INT;
-            } else if (op == TOK_LESS || op == TOK_GREATER || op == TOK_EQUALS || op == TOK_NOT_EQUALS) {
+            } else if (op == TOK_LESS || op == TOK_GREATER || op == TOK_EQUALS || op == TOK_NOT_EQUALS || op == TOK_GREATER_EQUALS || op == TOK_LESS_EQUALS) {
                 return VALUE_BOOL;
             }
             return VALUE_UNKNOWN;
@@ -60,7 +60,9 @@ void type_check(ASTNode *node, Resolver* r) {
             case TOK_MULT:
             case TOK_DIV:
             case TOK_LESS:
+            case TOK_LESS_EQUALS:
             case TOK_GREATER:
+            case TOK_GREATER_EQUALS:
             case TOK_MODULO:
                 if (left_type != VALUE_INT || right_type != VALUE_INT) {
                     fprintf(stderr, "error: cannot use %s operator on %s and %s\n",

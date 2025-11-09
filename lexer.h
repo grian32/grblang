@@ -30,6 +30,8 @@ typedef enum {
     TOK_IDENT,
     TOK_EQUALS, // ==
     TOK_NOT_EQUALS, // !=
+    TOK_LESS_EQUALS, // <=
+    TOK_GREATER_EQUALS, // >=
     TOK_VAR, // var
     TOK_TRUE, // true
     TOK_FALSE, // false
