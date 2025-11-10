@@ -126,7 +126,7 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b) {
                 bytecode_gen(node->program.statements[i], b);
             }
             break;
-        case AST_IF:
+        case AST_IF: {
             bytecode_gen(node->if_stmt.condition, b);
 
             int jmpn_step_start = emit_jmpn(b, 0);
@@ -153,6 +153,18 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b) {
                 patch_int(b, jmp_instruction_count, jmp_step_start);
             }
             break;
+        }
+        case AST_WHILE: {
+            int jmp_start = b->code_size + 1; // this should land on the first instruction of the while condition
+            bytecode_gen(node->while_stmt.condition, b);
+            // int jmpn_step_start = emit_jmpn(b, 0);
+            for (int i = 0; i < node->while_stmt.statements_count; i++) {
+                bytecode_gen(node->while_stmt.statements[i], b);
+            }
+            emit_jmp(b, jmp_start); // issue here, jumps back to condition correctly, but for whatever reason terminates there, even with no jmpn, at which point it should loop infinitely, but the stack outputs true
+            // patch_int(b, b->code_size + 1, jmpn_step_start);
+            break;
+        }
     }
 }
 

@@ -42,17 +42,18 @@ int main(void) {
 
     type_check(node, &r);
 
-    // BytecodeEmitter b;
-    // bytecode_init(&b);
-    // bytecode_gen(node, &b);
+    BytecodeEmitter b;
+    bytecode_init(&b);
+    bytecode_gen(node, &b);
 
-    // VM vm;
-    // vm_init(&vm, &b, r.count);
-    // vm_run(&vm);
+    VM vm;
+    vm_init(&vm, &b, r.count);
+    vm_run(&vm);
 
-    // char buffer[50];
-    // stack_value_string(vm.stack.data[vm.stack.top], buffer);
-    // printf("\nvm result: %s\n", buffer);
+    char buffer[50];
+    printf("\n%d\n", vm.locals[0].int_val);
+    stack_value_string(vm.stack.data[vm.stack.top], buffer);
+    printf("\nvm result: %s\n", buffer);
 
     return 0;
 }
