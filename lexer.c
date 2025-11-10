@@ -182,6 +182,9 @@ TokenType lex_parse_ident(Lexer* l, char** ident_out, const char** start_out, in
             if (strcmp(ident_str, "false") == 0) {
                 return TOK_FALSE;
             }
+            if (strcmp(ident_str, "while") == 0) {
+                return TOK_WHILE;
+            }
             break;
         default: break;
     }

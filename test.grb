@@ -5,8 +5,10 @@ y = y + 1;
 
 var n: bool = y == 6;
 
-if (y >= 6 && y <= 5) {
-    3;
-} else {
-    4;
+var d = 5;
+
+while (d < 10) {
+    d = d + 1;
 };
+
+d;

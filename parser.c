@@ -155,6 +155,21 @@ void print_ast(ASTNode* node, int indent, bool newline) {
                 printf("\n");
             }
             break;
+        case AST_WHILE:
+            printf("AST_WHILE(condition =");
+            print_ast(node->while_stmt.condition, indent, false);
+            printf(", statements =");
+
+            for (int i = 0; i < node->while_stmt.statements_count; i++) {
+                print_ast(node->while_stmt.statements[i], indent, false);
+                printf(";");
+            }
+
+            printf(")");
+            if (newline) {
+                printf("\n");
+            }
+            break;
         case AST_VAR_ASSIGN:
             printf("AST_VAR_ASSIGN(slot=%d,%s=", node->var_assign.slot, node->var_assign.name);
             print_ast(node->var_assign.value, 0, false);
@@ -282,6 +297,17 @@ ASTNode* make_if_statement(ASTNode* condition, ASTNode** success_statements, int
     node->if_stmt.success_count = success_count;
     node->if_stmt.fail_statements = fail_statements;
     node->if_stmt.fail_count = fail_count;
+
+    return node;
+}
+
+ASTNode* make_while_statement(ASTNode* condition, ASTNode** statements, int statements_count) {
+    ASTNode* node = malloc(sizeof(ASTNode));
+
+    node->type = AST_WHILE;
+    node->while_stmt.condition = condition;
+    node->while_stmt.statements = statements;
+    node->while_stmt.statements_count = statements_count;
 
     return node;
 }
@@ -454,6 +480,10 @@ ASTNode* parse_statement(Parser *p) {
         return parse_if_stmt(p);
     }
 
+    if (p->curr.type == TOK_WHILE) {
+        return parse_while_stmt(p);
+    }
+
     return parse_expr(p);
 }
 
@@ -530,4 +560,23 @@ ASTNode* parse_if_stmt(Parser* p) {
     parser_next(p);
 
     return make_if_statement(condition, success_statements, success_count, fail_statements, fail_count);
+}
+
+ASTNode* parse_while_stmt(Parser* p) {
+    parser_next(p);
+    ASTNode* condition = parse_expr(p);
+    if (p->curr.type != TOK_LBRACE) {
+        fprintf(stderr, "expected lbrace after while statement condition\n");
+        exit(1);
+    }
+    parser_next(p);
+    int statements_capacity = 128, statements_count = 0;
+    ASTNode** statements;
+    parse_block(p, statements_capacity, TOK_RBRACE, &statements, &statements_count);
+    if (p->curr.type != TOK_RBRACE) {
+        fprintf(stderr, "expected rbrace after while statement block\n");
+    }
+    parser_next(p);
+
+    return make_while_statement(condition, statements, statements_count);
 }

@@ -178,6 +178,19 @@ void type_check(ASTNode *node, Resolver* r) {
 
         break;
     }
+    case AST_WHILE: {
+        type_check(node->while_stmt.condition, r);
+        VarType condition_type = get_expr_type(node->while_stmt.condition, r);
+
+        if (condition_type != VALUE_BOOL) {
+            fprintf(stderr, "error: cannot use a non-bool as while condition\n");
+            exit(1);
+        }
+
+        for (int i = 0; i < node->while_stmt.statements_count; i++) {
+            type_check(node->while_stmt.statements[i], r);
+        }
+    }
     default:
         break;
     }

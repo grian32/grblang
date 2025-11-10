@@ -11,6 +11,7 @@ typedef enum {
     AST_UNARY_OP,
     AST_PROGRAM,
     AST_IF,
+    AST_WHILE,
     AST_VAR_DECL,
     AST_VAR_ASSIGN,
     AST_VAR_REF,
@@ -78,6 +79,12 @@ typedef struct ASTNode {
             struct ASTNode** fail_statements;
             int fail_count;
         } if_stmt;
+
+        struct {
+            struct ASTNode* condition;
+            struct ASTNode** statements;
+            int statements_count;
+        } while_stmt;
     };
 } ASTNode;
 
@@ -106,6 +113,7 @@ ASTNode* make_binary_op(TokenType op, ASTNode* left, ASTNode* right);
 ASTNode* make_unary_op(TokenType op, ASTNode* right);
 ASTNode* make_program(ASTNode** statements, int count);
 ASTNode* make_if_statement(ASTNode* condition, ASTNode** success_statements, int success_count, ASTNode** fail_statements, int fail_count);
+ASTNode* make_while_statement(ASTNode* condition, ASTNode** statements, int statements_count);
 ASTNode* make_var_decl(char* name, ASTNode* value, VarType type);
 ASTNode* make_var_assign(char* name, ASTNode* value);
 ASTNode* make_var_ref(char* name);
@@ -120,6 +128,8 @@ ASTNode* parse_muldiv(Parser* p);
 
 // assumes p.curr == tok_if on call
 ASTNode* parse_if_stmt(Parser* p);
+// assumes p.curr == tok_while on call
+ASTNode* parse_while_stmt(Parser* p);
 
 /**
  * = highest precendence parse; to be used as a top-level entry point for parsing expression

@@ -29,7 +29,6 @@ typedef enum {
     TOK_MODULO, // %
     TOK_AND, // &&
     TOK_OR, // ||
-    TOK_IDENT,
     TOK_EQUALS, // ==
     TOK_NOT_EQUALS, // !=
     TOK_LESS_EQUALS, // <=
@@ -37,11 +36,13 @@ typedef enum {
     TOK_VAR, // var
     TOK_TRUE, // true
     TOK_FALSE, // false
+    TOK_WHILE, // while
+    TOK_IF, // if
+    TOK_ELSE, // else
+    TOK_IDENT,
     TOK_INT,
     TOK_INT_TYPE,
     TOK_BOOL_TYPE,
-    TOK_IF,
-    TOK_ELSE,
     TOK_EOF
 } TokenType;
 

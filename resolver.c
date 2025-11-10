@@ -102,6 +102,12 @@ void resolve(ASTNode* node, Resolver* r) {
                 }
             }
             break;
+        case AST_WHILE:
+            resolve(node->while_stmt.condition, r);
+            for (int i = 0; i < node->while_stmt.statements_count; i++) {
+                resolve(node->while_stmt.statements[i], r);
+            }
+            break;
         case AST_BINARY_OP:
             resolve(node->binary_op.left, r);
             resolve(node->binary_op.right, r);
