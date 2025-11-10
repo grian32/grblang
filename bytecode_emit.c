@@ -1,6 +1,8 @@
 #include "bytecode_emit.h"
 #include "lexer.h"
 #include "parser.h"
+#include "resolver.h"
+#include "type_checker.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,7 +42,7 @@ void bytecode_resize_const(BytecodeEmitter* b) {
     b->const_capacity = new_capacity;
 }
 
-void bytecode_gen(ASTNode* node, BytecodeEmitter* b) {
+void bytecode_gen(ASTNode* node, BytecodeEmitter* b, Resolver* r) {
     if (!node) return;
 
     switch (node->type) {
@@ -53,23 +55,23 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b) {
         case AST_BINARY_OP:
             // need to output left/right differently from all other ops for and and or
             if (node->binary_op.op == TOK_AND) {
-                bytecode_gen(node->binary_op.left, b);
+                bytecode_gen(node->binary_op.left, b, r);
                 int jmpn_start = emit_jmpn(b, 0);
-                bytecode_gen(node->binary_op.right, b);
+                bytecode_gen(node->binary_op.right, b, r);
                 int jmpn_step_count = b->code_size - (jmpn_start + 2);
                 patch_int(b, jmpn_step_count, jmpn_start);
                 break;
             } else if (node->binary_op.op == TOK_OR) {
-                bytecode_gen(node->binary_op.left, b);
+                bytecode_gen(node->binary_op.left, b, r);
                 int jmpt_start = emit_jmpt(b, 0);
-                bytecode_gen(node->binary_op.right, b);
+                bytecode_gen(node->binary_op.right, b, r);
                 int jmpt_step_count = b->code_size - (jmpt_start + 2);
                 patch_int(b, jmpt_step_count, jmpt_start);
                 break;
             }
 
-            bytecode_gen(node->binary_op.left, b);
-            bytecode_gen(node->binary_op.right, b);
+            bytecode_gen(node->binary_op.left, b, r);
+            bytecode_gen(node->binary_op.right, b, r);
 
             switch (node->binary_op.op) {
                 case TOK_PLUS: emit_iadd(b); break;
@@ -83,7 +85,8 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b) {
                 case TOK_MODULO: emit_imod(b); break;
                 case TOK_EQUALS: {
                     // can just check the left node as type checker should catch cases where it's not the same type on both sides
-                    if (node->binary_op.left->type == AST_INT) {
+                    VarType leftType = get_expr_type(node->binary_op.left, r);
+                    if (leftType == VALUE_INT) {
                         emit_ieq(b);
                     } else {
                         emit_beq(b);
@@ -91,7 +94,8 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b) {
                     break;
                 }
                 case TOK_NOT_EQUALS: {
-                    if (node->binary_op.left->type == AST_INT) {
+                    VarType leftType = get_expr_type(node->binary_op.left, r);
+                    if (leftType == VALUE_INT) {
                         emit_ineq(b);
                     } else {
                         emit_bneq(b);
@@ -102,7 +106,7 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b) {
             }
             break;
         case AST_UNARY_OP:
-            bytecode_gen(node->unary_op.right, b);
+            bytecode_gen(node->unary_op.right, b, r);
 
             switch (node->unary_op.op) {
                 case TOK_MINUS: emit_neg(b); break;
@@ -111,11 +115,11 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b) {
             }
             break;
         case AST_VAR_DECL:
-            bytecode_gen(node->var_decl.value, b);
+            bytecode_gen(node->var_decl.value, b, r);
             emit_store(b, node->var_type, node->var_decl.slot);
             break;
         case AST_VAR_ASSIGN:
-            bytecode_gen(node->var_assign.value, b);
+            bytecode_gen(node->var_assign.value, b, r);
             emit_store(b, node->var_type, node->var_assign.slot);
             break;
         case AST_VAR_REF:
@@ -123,16 +127,16 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b) {
             break;
         case AST_PROGRAM:
             for (int i = 0; i < node->program.count; i++) {
-                bytecode_gen(node->program.statements[i], b);
+                bytecode_gen(node->program.statements[i], b, r);
             }
             break;
         case AST_IF: {
-            bytecode_gen(node->if_stmt.condition, b);
+            bytecode_gen(node->if_stmt.condition, b, r);
 
             int jmpn_step_start = emit_jmpn(b, 0);
             int curr_instruction_count = b->code_size;
             for (int i = 0; i < node->if_stmt.success_count; i++) {
-                bytecode_gen(node->if_stmt.success_statements[i], b);
+                bytecode_gen(node->if_stmt.success_statements[i], b, r);
             }
             int jmpn_instruction_count = b->code_size - curr_instruction_count;
             if (node->if_stmt.fail_statements) {
@@ -147,7 +151,7 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b) {
                 int jmp_step_start = emit_jmp(b, 0);
                 int curr_instruction_count = b->code_size;
                 for (int i = 0; i < node->if_stmt.fail_count; i++) {
-                    bytecode_gen(node->if_stmt.fail_statements[i], b);
+                    bytecode_gen(node->if_stmt.fail_statements[i], b, r);
                 }
                 int jmp_instruction_count = b->code_size - curr_instruction_count;
                 patch_int(b, jmp_instruction_count, jmp_step_start);
@@ -155,14 +159,16 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b) {
             break;
         }
         case AST_WHILE: {
-            int jmp_start = b->code_size + 1; // this should land on the first instruction of the while condition
-            bytecode_gen(node->while_stmt.condition, b);
-            // int jmpn_step_start = emit_jmpn(b, 0);
+            int jmp_start = b->code_size;
+            bytecode_gen(node->while_stmt.condition, b, r);
+            int jmpn_idx = emit_jmpn(b, 0);
+
             for (int i = 0; i < node->while_stmt.statements_count; i++) {
-                bytecode_gen(node->while_stmt.statements[i], b);
+                bytecode_gen(node->while_stmt.statements[i], b, r);
             }
-            emit_jmp(b, jmp_start); // issue here, jumps back to condition correctly, but for whatever reason terminates there, even with no jmpn, at which point it should loop infinitely, but the stack outputs true
-            // patch_int(b, b->code_size + 1, jmpn_step_start);
+
+            emit_jmp(b, jmp_start - b->code_size - 3);
+            patch_int(b, b->code_size - (jmpn_idx + 2), jmpn_idx);
             break;
         }
     }

@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include "parser.h"
+#include "resolver.h"
 #include "stack.h"
 
 typedef struct {
@@ -48,7 +49,7 @@ void bytecode_init(BytecodeEmitter* b);
 void bytecode_resize_code(BytecodeEmitter* b);
 void bytecode_resize_const(BytecodeEmitter* b);
 
-void bytecode_gen(ASTNode* node, BytecodeEmitter* b);
+void bytecode_gen(ASTNode* node, BytecodeEmitter* b, Resolver* r);
 
 uint16_t add_const(BytecodeEmitter* b, StackValue val);
 

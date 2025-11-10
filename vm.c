@@ -173,29 +173,25 @@ void vm_run(VM* vm) {
                 break;
             }
             case OP_JMP: {
-                int steps = (vm->code[vm->pc] << 8 | vm->code[vm->pc + 1]);
+                int steps = (int)(int16_t)(vm->code[vm->pc] << 8 | vm->code[vm->pc + 1]);
                 vm->pc += steps + 2; // steps and then the 2 for the actual step amount
                 break;
             }
             case OP_JMPN: {
-                int steps = (vm->code[vm->pc] << 8 | vm->code[vm->pc + 1]);
+                int steps = (int)(int16_t)(vm->code[vm->pc] << 8 | vm->code[vm->pc + 1]);
                 vm->pc += 2;
-                StackValue sv = stack_peek(&vm->stack);
+                StackValue sv = stack_pop(&vm->stack);
                 if (!sv.bool_val) {
                     vm->pc += steps;
-                } else {
-                    stack_pop(&vm->stack);
                 }
                 break;
             }
             case OP_JMPT: {
-                int steps = (vm->code[vm->pc] << 8 | vm->code[vm->pc + 1]);
+                int steps = (int)(int16_t)(vm->code[vm->pc] << 8 | vm->code[vm->pc + 1]);
                 vm->pc += 2;
-                StackValue sv = stack_peek(&vm->stack);
+                StackValue sv = stack_pop(&vm->stack);
                 if (sv.bool_val) {
                     vm->pc += steps;
-                } else {
-                    stack_pop(&vm->stack);
                 }
                 break;
             }
