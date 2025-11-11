@@ -127,10 +127,6 @@ void type_check(ASTNode *node, Resolver* r) {
         break;
     case AST_VAR_DECL: {
         type_check(node->var_decl.value, r);
-        if (node->var_decl.type_inferred) {
-            // we can assume an inferred type is correct, and as such don't need to type check
-            break;
-        }
         VarType var_type = node->var_type;
         VarType value_type = get_expr_type(node->var_decl.value, r);
         if (var_type != value_type) {

@@ -60,7 +60,6 @@ typedef struct ASTNode {
             char* name;
             struct ASTNode* value;
             int slot;
-            bool type_inferred;
         } var_decl;
         struct {
             char* name;
@@ -95,7 +94,6 @@ typedef struct {
     int pos;
 } Parser;
 
-VarType get_expr_type_ast(ASTNode* node);
 // convert TOK_XXX_TYPE tokens to VALUE_XXX VarType
 VarType tok_to_var_type(TokenType tt);
 

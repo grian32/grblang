@@ -1,7 +1,12 @@
-var d = 5;
+var int d = 5;
+
+var int x = 3;
 
 while (d < 10) {
     d = d + 1;
 };
 
-d;
+x = x+1;
+
+var bool n = true;
+n;
