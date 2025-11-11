@@ -112,6 +112,16 @@ void resolve(ASTNode* node, Resolver* r) {
             resolve(node->binary_op.left, r);
             resolve(node->binary_op.right, r);
             break;
+        case AST_COMPOUND_ASSIGNMENT:
+            resolve(node->compound_assignment.value, r);
+            node->compound_assignment.slot = resolver_lookup(r, node->compound_assignment.name);
+            if (node->compound_assignment.slot == -1) {
+                fprintf(stderr, "undefined variable `%s` when trying to reassign\n", node->var_assign.name);
+                exit(1);
+            }
+            node->var_type = r->types[node->compound_assignment.slot];
+        break;
+            break;
         case AST_UNARY_OP:
             resolve(node->unary_op.right, r);
             break;

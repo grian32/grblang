@@ -13,9 +13,13 @@ typedef enum {
     TOK_UNKNOWN,
     TOK_ERROR,
     TOK_PLUS, // +
+    TOK_PLUS_EQUALS, // +=
     TOK_MINUS, // -
+    TOK_MINUS_EQUALS, // -=
     TOK_MULT, // *
+    TOK_MULT_EQUALS, // *=
     TOK_DIV, // /
+    TOK_DIV_EQUALS, // /=
     TOK_LPAREN, // (
     TOK_RPAREN, // )
     TOK_ASSIGN, // =

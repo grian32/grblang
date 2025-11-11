@@ -8,6 +8,7 @@ typedef enum {
     AST_INT,
     AST_BOOL,
     AST_BINARY_OP,
+    AST_COMPOUND_ASSIGNMENT,
     AST_UNARY_OP,
     AST_PROGRAM,
     AST_IF,
@@ -67,6 +68,12 @@ typedef struct ASTNode {
             int slot;
         } var_assign;
         struct {
+            TokenType op;
+            char* name;
+            int slot;
+            struct ASTNode* value;
+        } compound_assignment;
+        struct {
             char* name;
             int slot;
         } var_ref;
@@ -108,6 +115,7 @@ ASTNode* make_int(int value);
 ASTNode* make_true_bool();
 ASTNode* make_false_bool();
 ASTNode* make_binary_op(TokenType op, ASTNode* left, ASTNode* right);
+ASTNode* make_compound_assignment(TokenType op, char* name, ASTNode* value);
 ASTNode* make_unary_op(TokenType op, ASTNode* right);
 ASTNode* make_program(ASTNode** statements, int count);
 ASTNode* make_if_statement(ASTNode* condition, ASTNode** success_statements, int success_count, ASTNode** fail_statements, int fail_count);
@@ -116,6 +124,7 @@ ASTNode* make_var_decl(char* name, ASTNode* value, VarType type);
 ASTNode* make_var_assign(char* name, ASTNode* value);
 ASTNode* make_var_ref(char* name);
 
+ASTNode* parse_compound_assignment(Parser* p);
 ASTNode* parse_logical_or(Parser* p);
 ASTNode* parse_logical_and(Parser* p);
 ASTNode* parse_comparison(Parser* p);

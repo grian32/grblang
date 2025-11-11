@@ -201,18 +201,51 @@ Token lex_next(Lexer* l) {
     t.length = 1;
 
     switch (l->current) {
+        // TODO: abstract out x token plus equals = other token into a function
         case '+':
             t.type = TOK_PLUS;
-            break;
+            lex_advance(l);
+
+            if (l->current == '=') {
+                t.type = TOK_PLUS_EQUALS;
+                t.length++;
+                lex_advance(l);
+            }
+
+            return t;
         case '-':
             t.type = TOK_MINUS;
-            break;
+            lex_advance(l);
+
+            if (l->current == '=') {
+                t.type = TOK_MINUS_EQUALS;
+                t.length++;
+                lex_advance(l);
+            }
+
+            return t;
         case '*':
             t.type = TOK_MULT;
-            break;
+            lex_advance(l);
+
+            if (l->current == '=') {
+                t.type = TOK_MULT_EQUALS;
+                t.length++;
+                lex_advance(l);
+            }
+
+            return t;
         case '/':
             t.type = TOK_DIV;
-            break;
+            lex_advance(l);
+
+            if (l->current == '=') {
+                t.type = TOK_DIV_EQUALS;
+                t.length++;
+                lex_advance(l);
+            }
+
+            return t;
         case '(':
             t.type = TOK_LPAREN;
             break;

@@ -39,9 +39,13 @@ char* op_string(TokenType op) {
         case TOK_AND: return "&&";
         case TOK_OR: return "||";
         case TOK_DIV: return "/";
+        case TOK_DIV_EQUALS: return "/=";
         case TOK_MULT: return "*";
+        case TOK_MULT_EQUALS: return "*=";
         case TOK_PLUS: return "+";
+        case TOK_PLUS_EQUALS: return "+=";
         case TOK_MINUS: return "-";
+        case TOK_MINUS_EQUALS: return "-=";
         case TOK_MODULO: return "%";
 
         default: return "";
@@ -87,6 +91,14 @@ void print_ast(ASTNode* node, int indent, bool newline) {
             }
             print_ast(node->binary_op.left, indent + 1, false);
             print_ast(node->binary_op.right, indent + 1, false);
+            break;
+        case AST_COMPOUND_ASSIGNMENT:
+            printf("AST_COMPOUND_ASSIGN(slot=%d,%s%s", node->compound_assignment.slot, node->compound_assignment.name, op_string(node->compound_assignment.op));
+            print_ast(node->compound_assignment.value, 0, false);
+            printf(";t=%s(%d))", var_type_string(node->var_type), node->var_type);
+            if (newline) {
+                printf("\n");
+            }
             break;
         case AST_UNARY_OP:
             printf("AST_UNARY_OP(%c)",node->unary_op.op == TOK_MINUS ? '-' : '!');
@@ -193,6 +205,15 @@ ASTNode* make_binary_op(TokenType op, ASTNode* left, ASTNode* right) {
     node->binary_op.op = op;
     node->binary_op.left = left;
     node->binary_op.right = right;
+    return node;
+}
+
+ASTNode* make_compound_assignment(TokenType op, char* name, ASTNode* value) {
+    ASTNode* node = malloc(sizeof(ASTNode));
+    node->type = AST_COMPOUND_ASSIGNMENT;
+    node->compound_assignment.op = op;
+    node->compound_assignment.name = name;
+    node->compound_assignment.value = value;
     return node;
 }
 
@@ -429,6 +450,29 @@ ASTNode* parse_statement(Parser *p) {
         ASTNode* val = parse_expr(p);
         return make_var_assign(name, val);
     }
+
+    if (p->curr.type == TOK_IDENT && (p->peek.type == TOK_PLUS_EQUALS || p->peek.type == TOK_MINUS_EQUALS || p->peek.type == TOK_MULT_EQUALS || p->peek.type == TOK_DIV_EQUALS)) {
+        char* name = p->curr.value.ident_val;
+        parser_next(p);
+        TokenType op = p->curr.type; // we are at the assignment token as parse_expr skips
+        parser_next(p);
+        ASTNode* value = parse_expr(p);
+        return make_compound_assignment(op, name, value);
+    }
+
+
+    // ASTNode* parse_compound_assignment(Parser* p) {
+    //     ASTNode* left = parse_logical_or(p);
+
+    //     if (p->curr.type == TOK_PLUS_EQUALS || p->curr.type == TOK_MINUS_EQUALS || p->curr.type == TOK_MULT_EQUALS || p->curr.type == TOK_DIV_EQUALS) {
+    //         TokenType op = p->curr.type;
+    //         parser_next(p);
+    //         ASTNode* right = parse_logical_or(p);
+    //         return make_compound_assignment(op, left, right);
+    //     }
+
+    //     return left;
+    // }
 
     if (p->curr.type == TOK_IF) {
         return parse_if_stmt(p);

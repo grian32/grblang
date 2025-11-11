@@ -153,6 +153,20 @@ void type_check(ASTNode *node, Resolver* r) {
         }
         break;
     }
+    case AST_COMPOUND_ASSIGNMENT: {
+        type_check(node->compound_assignment.value, r);
+        VarType var_type = node->var_type;
+        VarType value_type = get_expr_type(node->compound_assignment.value, r);
+        if (var_type != value_type) {
+            fprintf(stderr, "error: cannot assign %s to variable `%s` of type %s\n",
+                var_type_string(value_type),
+                node->compound_assignment.name,
+                var_type_string(var_type)
+            );
+            exit(1);
+        }
+        break;
+    }
     case AST_IF: {
         type_check(node->if_stmt.condition, r);
         VarType condition_type = get_expr_type(node->if_stmt.condition, r);
