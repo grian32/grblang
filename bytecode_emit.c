@@ -122,6 +122,10 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b, Resolver* r) {
             bytecode_gen(node->var_assign.value, b, r);
             emit_store(b, node->var_type, node->var_assign.slot);
             break;
+        case AST_COMPOUND_ASSIGNMENT:
+            bytecode_gen(node->compound_assignment.value, b, r);
+            emit_icompound_assignment(b, node->compound_assignment.op, node->compound_assignment.slot);
+            break;
         case AST_VAR_REF:
             emit_load(b, node->var_type, node->var_ref.slot);
             break;
@@ -261,6 +265,29 @@ void emit_ilte(BytecodeEmitter* b) {
 
 void emit_ieq(BytecodeEmitter* b) {
     emit_byte(b, OP_IEQ);
+}
+
+void emit_icompound_assignment(BytecodeEmitter* b, TokenType op, int slot) {
+    switch (op) {
+        case TOK_PLUS_EQUALS:
+            emit_byte(b, OP_IADDSTORE);
+            break;
+        case TOK_MINUS_EQUALS:
+            emit_byte(b, OP_ISUBSTORE);
+            break;
+        case TOK_MULT_EQUALS:
+            emit_byte(b, OP_IMULSTORE);
+            break;
+        case TOK_DIV_EQUALS:
+            emit_byte(b, OP_IDIVSTORE);
+            break;
+        default:
+            fprintf(stderr, "invalid operator token while trying to emit compound assignment operation: %d\n", op);
+            exit(1);
+            break;
+    }
+    emit_byte(b, (slot>> 8) & 0xFF);
+    emit_byte(b, slot & 0xFF);
 }
 
 void emit_beq(BytecodeEmitter* b) {

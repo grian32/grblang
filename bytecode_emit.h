@@ -2,6 +2,7 @@
 #define GRBLANG_BYTECODE_EMIT_H
 #include <stdint.h>
 
+#include "lexer.h"
 #include "parser.h"
 #include "resolver.h"
 #include "stack.h"
@@ -21,9 +22,13 @@ typedef enum {
     OP_PUSH_TRUE, // true
     OP_PUSH_FALSE, // false
     OP_IADD,
+    OP_IADDSTORE,
     OP_ISUB,
+    OP_ISUBSTORE,
     OP_IMUL,
+    OP_IMULSTORE,
     OP_IDIV,
+    OP_IDIVSTORE,
     OP_INEG,
     OP_IGT,
     OP_IGTE,
@@ -71,6 +76,7 @@ void emit_ilt(BytecodeEmitter* b);
 void emit_ilte(BytecodeEmitter* b);
 void emit_ieq(BytecodeEmitter* b);
 void emit_ineq(BytecodeEmitter* b);
+void emit_icompound_assignment(BytecodeEmitter* b, TokenType op, int slot);
 
 void emit_beq(BytecodeEmitter* b);
 void emit_bneq(BytecodeEmitter* b);

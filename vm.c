@@ -72,6 +72,58 @@ void vm_run(VM* vm) {
                 stack_push(&vm->stack, sv);
                 break;
             }
+            case OP_IADDSTORE: {
+                StackValue value = stack_pop(&vm->stack);
+                int slot = (vm->code[vm->pc] << 8) | vm->code[vm->pc + 1];
+                vm->pc += 2;
+
+                if (slot >= vm->locals_size) {
+                    fprintf(stderr, "invalid slot `%d` for locals\n", slot);
+                    exit(1);
+                }
+
+                vm->locals[slot].int_val += value.int_val;
+                break;
+            }
+            case OP_ISUBSTORE: {
+                StackValue value = stack_pop(&vm->stack);
+                int slot = (vm->code[vm->pc] << 8) | vm->code[vm->pc + 1];
+                vm->pc += 2;
+
+                if (slot >= vm->locals_size) {
+                    fprintf(stderr, "invalid slot `%d` for locals\n", slot);
+                    exit(1);
+                }
+
+                vm->locals[slot].int_val -= value.int_val;
+                break;
+            }
+            case OP_IDIVSTORE: {
+                StackValue value = stack_pop(&vm->stack);
+                int slot = (vm->code[vm->pc] << 8) | vm->code[vm->pc + 1];
+                vm->pc += 2;
+
+                if (slot >= vm->locals_size) {
+                    fprintf(stderr, "invalid slot `%d` for locals\n", slot);
+                    exit(1);
+                }
+
+                vm->locals[slot].int_val /= value.int_val;
+                break;
+            }
+            case OP_IMULSTORE: {
+                StackValue value = stack_pop(&vm->stack);
+                int slot = (vm->code[vm->pc] << 8) | vm->code[vm->pc + 1];
+                vm->pc += 2;
+
+                if (slot >= vm->locals_size) {
+                    fprintf(stderr, "invalid slot `%d` for locals\n", slot);
+                    exit(1);
+                }
+
+                vm->locals[slot].int_val *= value.int_val;
+                break;
+            }
             case OP_IGT: {
                 StackValue b = stack_pop(&vm->stack);
                 StackValue a = stack_pop(&vm->stack);
