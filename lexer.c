@@ -174,7 +174,11 @@ TokenType lex_parse_ident(Lexer* l, char** ident_out, const char** start_out, in
     char ident_str[256];
     int i = 0;
 
-    while (IS_ALPHA(l->current) && i < 256) {
+    while (IS_ALPHA(l->current)) {
+        if (i >= 255) { // previous condition was i < 256 in while; this preserves the same behaviour
+            fprintf(stderr, "error: identifiers not allowed to be longer than 256");
+            exit(1);
+        }
         ident_str[i++] = l->current;
         lex_advance(l);
     }
