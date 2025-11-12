@@ -74,11 +74,8 @@ void token_string(Token t, char buffer[50]) {
         case TOK_COLON:
             sprintf(buffer, "COLON(@%d)", t.length);
             break;
-        case TOK_INT_TYPE:
-            sprintf(buffer, "INT_TYPE(@%d)", t.length);
-            break;
-        case TOK_BOOL_TYPE:
-            sprintf(buffer, "BOOL_TYPE(@%d)", t.length);
+        case TOK_TYPE:
+            sprintf(buffer, "TYPE(&%d@%d)", t.value.type_val, t.length);
             break;
         case TOK_IF:
             sprintf(buffer, "IF(@%d)", t.length);
@@ -137,7 +134,7 @@ int lex_parse_int(Lexer* l, const char **start_out, int* length_out) {
     return (int) conv_int;
 }
 
-TokenType lex_parse_ident(Lexer* l, char** ident_out, const char** start_out, int* len_out) {
+TokenType lex_parse_ident(Lexer* l, char** ident_out, const char** start_out, int* len_out, DataType* type_out) {
     const char* start = &l->current;
     char ident_str[256];
     int i = 0;
@@ -162,7 +159,8 @@ TokenType lex_parse_ident(Lexer* l, char** ident_out, const char** start_out, in
             }
 
             if (strcmp(ident_str, "int") == 0) {
-                return TOK_INT_TYPE;
+                *type_out = DATA_INT;
+                return TOK_TYPE;
             }
             break;
         case 4:
@@ -171,7 +169,8 @@ TokenType lex_parse_ident(Lexer* l, char** ident_out, const char** start_out, in
             }
 
             if (strcmp(ident_str, "bool") == 0) {
-                return TOK_BOOL_TYPE;
+                *type_out = DATA_BOOL;
+                return TOK_TYPE;
             }
 
             if (strcmp(ident_str, "else") == 0) {
@@ -348,7 +347,7 @@ Token lex_next(Lexer* l) {
                 return t;
             }
             if (IS_ALPHA(l->current)) {
-                t.type = lex_parse_ident(l, &t.value.ident_val, &t.start_literal, &t.length);
+                t.type = lex_parse_ident(l, &t.value.ident_val, &t.start_literal, &t.length, &t.value.type_val);
                 return t;
             }
 

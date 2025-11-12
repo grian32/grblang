@@ -45,10 +45,14 @@ typedef enum {
     TOK_ELSE, // else
     TOK_IDENT,
     TOK_INT,
-    TOK_INT_TYPE,
-    TOK_BOOL_TYPE,
+    TOK_TYPE,
     TOK_EOF
 } TokenType;
+
+typedef enum {
+    DATA_INT,
+    DATA_BOOL
+} DataType;
 
 typedef struct {
     TokenType type;
@@ -57,6 +61,7 @@ typedef struct {
     union {
         int int_val;
         char* ident_val;
+        DataType type_val;
         // TODO: more as needed
     } value;
 } Token;
@@ -68,7 +73,7 @@ void lexer_init(Lexer* l, const char* src);
 void lex_skip_whitespace(Lexer* l);
 int lex_parse_int(Lexer* l, const char** start_out, int* len_out);
 // returns token type, if TOK_IDENT is returned, then ident_out has been set to the identifier, otherwise it has found a keyword and has not set ident_out. start_out and len_out are set in both cases
-TokenType lex_parse_ident(Lexer* l, char** ident_out, const char** start_out, int* len_out);
+TokenType lex_parse_ident(Lexer* l, char** ident_out, const char** start_out, int* len_out, DataType* type_out);
 
 Token lex_next(Lexer* l);
 

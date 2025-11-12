@@ -101,8 +101,8 @@ typedef struct {
     int pos;
 } Parser;
 
-// convert TOK_XXX_TYPE tokens to VALUE_XXX VarType
-VarType tok_to_var_type(TokenType tt);
+// convert DATA_XXX DataType to VALUE_XXX VarType
+VarType data_to_var_type(DataType tt);
 
 void parser_init(Parser* p, Lexer* l);
 void parser_next(Parser* p);

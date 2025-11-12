@@ -4,11 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-VarType tok_to_var_type(TokenType tt) {
+VarType data_to_var_type(DataType tt) {
     switch (tt) {
-        case TOK_INT_TYPE:
+        case DATA_INT:
             return VALUE_INT;
-        case TOK_BOOL_TYPE:
+        case DATA_BOOL:
             return VALUE_BOOL;
         default:
             return VALUE_UNKNOWN;
@@ -418,11 +418,11 @@ ASTNode* parse_expr(Parser* p) {
 ASTNode* parse_statement(Parser *p) {
     if (p->curr.type == TOK_VAR) {
         parser_next(p);
-        if (p->curr.type != TOK_BOOL_TYPE && p->curr.type != TOK_INT_TYPE) {
+        if (p->curr.type != TOK_TYPE) {
             fprintf(stderr, "expected type ex:`bool`, `int` after `var` keyword in var declaration\n");
             exit(1);
         }
-        VarType var_type = tok_to_var_type(p->curr.type);
+        VarType var_type = data_to_var_type(p->curr.value.type_val);
         parser_next(p);
 
         if (p->curr.type != TOK_IDENT) {
