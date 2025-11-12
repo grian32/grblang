@@ -145,6 +145,15 @@ void lex_parse_string(Lexer* l, char** str_out, const char** start_out, int* len
     int i = 0;
 
     while (l->current != '"') {
+        if (i >= curr_capacity) {
+            curr_capacity *= 2;
+            char* new_str = realloc(str, sizeof(char) * curr_capacity);
+            if (!new_str) {
+                fprintf(stderr, "failed to realloc str while parsing str\n");
+                exit(1);
+            }
+            str = new_str;
+        }
         str[i++] = l->current;
         lex_advance(l);
     }
