@@ -1,5 +1,7 @@
 var int d = 64;
 
+var string bye = "hello";
+
 while (d >= 17) {
     d /= 2;
 };

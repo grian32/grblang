@@ -32,6 +32,9 @@ void token_string(Token t, char buffer[50]) {
         case TOK_INT:
             sprintf(buffer, "INT(=%d, @%d)", t.value.int_val, t.length);
             break;
+        case TOK_STRING:
+            sprintf(buffer, "STRING(=%s, @%d)", t.value.string_val, t.length);
+            break;
         case TOK_LPAREN:
             sprintf(buffer, "LPAREN(@%d)", t.length);
             break;
@@ -134,6 +137,29 @@ int lex_parse_int(Lexer* l, const char **start_out, int* length_out) {
     return (int) conv_int;
 }
 
+void lex_parse_string(Lexer* l, char** str_out, const char** start_out, int* len_out) {
+    lex_advance(l);
+    const char* start = &l->current;
+    int curr_capacity = 256;
+    char* str = malloc(sizeof(char) * curr_capacity);
+    int i = 0;
+
+    while (l->current != '"') {
+        str[i++] = l->current;
+        lex_advance(l);
+    }
+
+    if (l->current != '"') {
+        fprintf(stderr, "expected \" after string\n");
+        exit(1);
+    }
+
+    lex_advance(l);
+    *str_out = str;
+    *start_out = start;
+    *len_out = i;
+}
+
 TokenType lex_parse_ident(Lexer* l, char** ident_out, const char** start_out, int* len_out, DataType* type_out) {
     const char* start = &l->current;
     char ident_str[256];
@@ -185,6 +211,13 @@ TokenType lex_parse_ident(Lexer* l, char** ident_out, const char** start_out, in
                 return TOK_WHILE;
             }
             break;
+        case 6:
+            if (strcmp(ident_str, "string") == 0) {
+                *type_out = DATA_STRING;
+                return TOK_TYPE;
+            }
+            break;
+
         default: break;
     }
 
@@ -348,6 +381,11 @@ Token lex_next(Lexer* l) {
             }
             if (IS_ALPHA(l->current)) {
                 t.type = lex_parse_ident(l, &t.value.ident_val, &t.start_literal, &t.length, &t.value.type_val);
+                return t;
+            }
+            if (l->current == '"') {
+                t.type = TOK_STRING;
+                lex_parse_string(l, &t.value.string_val, &t.start_literal, &t.length);
                 return t;
             }
 

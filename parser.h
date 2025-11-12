@@ -7,6 +7,7 @@
 typedef enum {
     AST_INT,
     AST_BOOL,
+    AST_STRING,
     AST_BINARY_OP,
     AST_COMPOUND_ASSIGNMENT,
     AST_UNARY_OP,
@@ -21,6 +22,7 @@ typedef enum {
 typedef enum {
     VALUE_INT,
     VALUE_BOOL,
+    VALUE_STRING,
     VALUE_UNKNOWN,
 } VarType;
 
@@ -31,6 +33,7 @@ typedef struct {
     union {
         int int_val;
         bool bool_val;
+        char* str_val;
     };
 } VarValue;
 
@@ -91,6 +94,11 @@ typedef struct ASTNode {
             struct ASTNode** statements;
             int statements_count;
         } while_stmt;
+
+        struct {
+            char* string_val;
+            int len;
+        } string;
     };
 } ASTNode;
 
@@ -114,6 +122,7 @@ ASTNode* make_int(int value);
 // separate true and false because i'd just be doubling up checks on tokentype if it was just one make_bool which is wasteful
 ASTNode* make_true_bool();
 ASTNode* make_false_bool();
+ASTNode* make_string(char* str_val, int len);
 ASTNode* make_binary_op(TokenType op, ASTNode* left, ASTNode* right);
 ASTNode* make_compound_assignment(TokenType op, char* name, ASTNode* value);
 ASTNode* make_unary_op(TokenType op, ASTNode* right);

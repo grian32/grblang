@@ -30,6 +30,7 @@ int main(void) {
 
     Lexer l;
     lexer_init(&l, src);
+
     Parser p;
     parser_init(&p, &l);
 
@@ -40,19 +41,19 @@ int main(void) {
 
     print_ast(node, 0, true);
 
-    type_check(node, &r);
+    // type_check(node, &r);
 
-    BytecodeEmitter b;
-    bytecode_init(&b);
-    bytecode_gen(node, &b, &r);
+    // BytecodeEmitter b;
+    // bytecode_init(&b);
+    // bytecode_gen(node, &b, &r);
 
-    VM vm;
-    vm_init(&vm, &b, r.count);
-    vm_run(&vm);
+    // VM vm;
+    // vm_init(&vm, &b, r.count);
+    // vm_run(&vm);
 
-    char buffer[50];
-    stack_value_string(vm.stack.data[vm.stack.top], buffer);
-    printf("\nvm result: %s\n", buffer);
+    // char buffer[50];
+    // stack_value_string(vm.stack.data[vm.stack.top], buffer);
+    // printf("\nvm result: %s\n", buffer);
 
-    return 0;
+    // return 0;
 }

@@ -10,6 +10,8 @@ VarType data_to_var_type(DataType tt) {
             return VALUE_INT;
         case DATA_BOOL:
             return VALUE_BOOL;
+        case DATA_STRING:
+            return VALUE_STRING;
         default:
             return VALUE_UNKNOWN;
     }
@@ -58,6 +60,8 @@ char* var_type_string(VarType type) {
         return "int";
     case VALUE_BOOL:
         return "bool";
+    case VALUE_STRING:
+        return "string";
     case VALUE_UNKNOWN:
         return "unknown";
     default:
@@ -80,6 +84,12 @@ void print_ast(ASTNode* node, int indent, bool newline) {
             break;
         case AST_BOOL:
             printf("AST_BOOL(%s)", node->bool_val ? "true" : "false");
+            if (newline) {
+                printf("\n");
+            }
+            break;
+        case AST_STRING:
+            printf("AST_STRING(%s)", node->string.string_val);
             if (newline) {
                 printf("\n");
             }
@@ -199,6 +209,16 @@ ASTNode* make_false_bool() {
     return node;
 }
 
+ASTNode* make_string(char* str_val, int len) {
+    ASTNode* node = malloc(sizeof(ASTNode));
+
+    node->type = AST_STRING;
+    node->string.string_val = str_val;
+    node->string.len = len;
+
+    return node;
+}
+
 ASTNode* make_binary_op(TokenType op, ASTNode* left, ASTNode* right) {
     ASTNode* node = malloc(sizeof(ASTNode));
     node->type = AST_BINARY_OP;
@@ -311,6 +331,12 @@ ASTNode* parse_primary(Parser* p) {
 
     if (p->curr.type == TOK_FALSE) {
         ASTNode* n = make_false_bool();
+        parser_next(p);
+        return n;
+    }
+
+    if (p->curr.type == TOK_STRING) {
+        ASTNode* n = make_string(p->curr.value.string_val, p->curr.length);
         parser_next(p);
         return n;
     }
@@ -459,20 +485,6 @@ ASTNode* parse_statement(Parser *p) {
         ASTNode* value = parse_expr(p);
         return make_compound_assignment(op, name, value);
     }
-
-
-    // ASTNode* parse_compound_assignment(Parser* p) {
-    //     ASTNode* left = parse_logical_or(p);
-
-    //     if (p->curr.type == TOK_PLUS_EQUALS || p->curr.type == TOK_MINUS_EQUALS || p->curr.type == TOK_MULT_EQUALS || p->curr.type == TOK_DIV_EQUALS) {
-    //         TokenType op = p->curr.type;
-    //         parser_next(p);
-    //         ASTNode* right = parse_logical_or(p);
-    //         return make_compound_assignment(op, left, right);
-    //     }
-
-    //     return left;
-    // }
 
     if (p->curr.type == TOK_IF) {
         return parse_if_stmt(p);
