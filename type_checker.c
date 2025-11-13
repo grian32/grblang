@@ -17,7 +17,17 @@ VarType get_expr_type(ASTNode* node, Resolver* r) {
             return VALUE_STRING;
         case AST_BINARY_OP: {
             TokenType op = node->binary_op.op;
-            if (op == TOK_PLUS || op == TOK_MINUS || op == TOK_MULT || op == TOK_DIV || op == TOK_MODULO) {
+            VarType left_type = get_expr_type(node->binary_op.left, r);
+            VarType right_type = get_expr_type(node->binary_op.left, r);
+            if (op == TOK_PLUS) {
+                if (left_type == VALUE_INT && right_type == VALUE_INT) {
+                    return VALUE_INT;
+                } else if (left_type == VALUE_STRING && right_type == VALUE_STRING) {
+                    return VALUE_STRING;
+                }
+            }
+
+            if (op == TOK_MINUS || op == TOK_MULT || op == TOK_DIV || op == TOK_MODULO) {
                 return VALUE_INT;
             } else if (op == TOK_LESS || op == TOK_GREATER || op == TOK_EQUALS || op == TOK_NOT_EQUALS || op == TOK_GREATER_EQUALS || op == TOK_LESS_EQUALS || op == TOK_AND || op == TOK_OR) {
                 return VALUE_BOOL;
@@ -57,7 +67,6 @@ void type_check(ASTNode *node, Resolver* r) {
         VarType left_type = get_expr_type(node->binary_op.left, r);
         VarType right_type = get_expr_type(node->binary_op.right, r);
         switch (node->binary_op.op) {
-            case TOK_PLUS:
             case TOK_MINUS:
             case TOK_MULT:
             case TOK_DIV:
@@ -67,6 +76,19 @@ void type_check(ASTNode *node, Resolver* r) {
             case TOK_GREATER_EQUALS:
             case TOK_MODULO:
                 if (left_type != VALUE_INT || right_type != VALUE_INT) {
+                    fprintf(stderr, "error: cannot use %s operator on %s and %s\n",
+                        op_string(node->binary_op.op),
+                        var_type_string(left_type),
+                        var_type_string(right_type)
+                    );
+                    exit(1);
+                }
+                break;
+            case TOK_PLUS:
+                if (
+                    (left_type != VALUE_INT || right_type != VALUE_INT) &&
+                    (left_type != VALUE_STRING || right_type != VALUE_STRING)
+                ) {
                     fprintf(stderr, "error: cannot use %s operator on %s and %s\n",
                         op_string(node->binary_op.op),
                         var_type_string(left_type),
@@ -91,7 +113,7 @@ void type_check(ASTNode *node, Resolver* r) {
                 break;
             case TOK_AND:
             case TOK_OR:
-                if (left_type != VALUE_BOOL || right_type != VALUE_BOOL ) {
+                if (left_type != VALUE_BOOL || right_type != VALUE_BOOL) {
                     fprintf(stderr, "error: cannot use %s operator on %s and %s\n",
                         op_string(node->binary_op.op),
                         var_type_string(left_type),

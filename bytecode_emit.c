@@ -2,10 +2,14 @@
 #include "lexer.h"
 #include "parser.h"
 #include "resolver.h"
+#include "stack.h"
 #include "type_checker.h"
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
 
 void bytecode_init(BytecodeEmitter* b) {
     int initial_capacity = 128;
@@ -52,6 +56,9 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b, Resolver* r) {
         case AST_BOOL:
             emit_push_bool(b, node->bool_val);
             break;
+        case AST_STRING:
+            emit_push_string(b, node->string.string_val, node->string.len);
+            break;
         case AST_BINARY_OP:
             // need to output left/right differently from all other ops for and and or
             if (node->binary_op.op == TOK_AND) {
@@ -74,7 +81,15 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b, Resolver* r) {
             bytecode_gen(node->binary_op.right, b, r);
 
             switch (node->binary_op.op) {
-                case TOK_PLUS: emit_iadd(b); break;
+                case TOK_PLUS: {
+                    VarType leftType = get_expr_type(node->binary_op.left, r);
+                    if (leftType == VALUE_INT) {
+                        emit_iadd(b);
+                    } else {
+                        emit_sconcat(b);
+                    }
+                    break;
+                }
                 case TOK_MINUS: emit_isub(b); break;
                 case TOK_MULT: emit_imul(b); break;
                 case TOK_DIV: emit_idiv(b); break;
@@ -212,10 +227,19 @@ void emit_byte(BytecodeEmitter* b, uint8_t val) {
 }
 
 void emit_store(BytecodeEmitter* b, VarType type, int slot) {
-    if (type == VALUE_INT) {
+    switch (type) {
+    case VALUE_INT:
         emit_byte(b, OP_ISTORE);
-    } else {
+        break;
+    case VALUE_BOOL:
         emit_byte(b, OP_BSTORE);
+        break;
+    case VALUE_STRING:
+        emit_byte(b, OP_SSTORE);
+        break;
+    case VALUE_UNKNOWN:
+        fprintf(stderr, "unknown value type for store");
+        break;
     }
     emit_byte(b, (slot>> 8) & 0xFF);
     emit_byte(b, slot & 0xFF);
@@ -344,4 +368,19 @@ void emit_imod(BytecodeEmitter* b) {
 void patch_int(BytecodeEmitter* b, int new_val, int starts_at) {
     b->code[starts_at] = (new_val >> 8) & 0xFF;
     b->code[starts_at + 1] = new_val & 0xFF;
+}
+
+void emit_push_string(BytecodeEmitter* b, char* str, int len) {
+    StringValue strv = {.string_val = strdup(str), .len = len};
+    StackValue sv = {.type = VALUE_STRING, .string_val = &strv};
+
+    uint16_t idx = add_const(b, sv);
+
+    emit_byte(b, OP_PUSH_STRING);
+    emit_byte(b, (idx >> 8) & 0xFF);
+    emit_byte(b, idx & 0xFF);
+}
+
+void emit_sconcat(BytecodeEmitter* b) {
+    emit_byte(b, OP_SCONCAT);
 }

@@ -3,11 +3,16 @@
 #include "parser.h"
 
 typedef struct {
+    char* string_val;
+    int len;
+} StringValue;
+
+typedef struct {
     VarType type;
     union {
         int int_val;
         bool bool_val;
-        char* string_val;
+        StringValue* string_val;
     };
 } StackValue;
 

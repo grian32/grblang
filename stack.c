@@ -1,4 +1,5 @@
 #include "stack.h"
+#include "parser.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,6 +11,9 @@ void stack_value_string(StackValue sv, char buffer[50]) {
             break;
         case VALUE_BOOL:
             sprintf(buffer, "BOOL(%s)", sv.bool_val ? "true" : "false");
+            break;
+        case VALUE_STRING:
+            sprintf(buffer, "STRING(%s)", sv.string_val);
             break;
         default:
             sprintf(buffer, "UNKNOWN");
