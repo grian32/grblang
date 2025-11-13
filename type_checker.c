@@ -13,6 +13,8 @@ VarType get_expr_type(ASTNode* node, Resolver* r) {
             return VALUE_INT;
         case AST_BOOL:
             return VALUE_BOOL;
+        case AST_STRING:
+            return VALUE_STRING;
         case AST_BINARY_OP: {
             TokenType op = node->binary_op.op;
             if (op == TOK_PLUS || op == TOK_MINUS || op == TOK_MULT || op == TOK_DIV || op == TOK_MODULO) {

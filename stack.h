@@ -7,6 +7,7 @@ typedef struct {
     union {
         int int_val;
         bool bool_val;
+        char* string_val;
     };
 } StackValue;
 
