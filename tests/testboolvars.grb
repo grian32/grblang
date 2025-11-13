@@ -1,0 +1,5 @@
+var bool x = true;
+
+x = false;
+
+x;

@@ -4,16 +4,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void stack_value_string(StackValue sv, char buffer[50]) {
+void stack_value_string(StackValue sv, bool simple, char buffer[50]) {
     switch (sv.type) {
         case VALUE_INT:
+            if (simple) {
+                sprintf(buffer, "%d", sv.int_val);
+                break;
+            }
             sprintf(buffer, "INT(%d)", sv.int_val);
             break;
         case VALUE_BOOL:
+            if (simple) {
+                sprintf(buffer, "%s", sv.bool_val ? "true" : "false");
+                break;
+            }
             sprintf(buffer, "BOOL(%s)", sv.bool_val ? "true" : "false");
             break;
         case VALUE_STRING:
-            sprintf(buffer, "STRING(%s)", sv.string_val);
+            if (simple) {
+                sprintf(buffer, "%s", sv.string_val->string_val);
+                break;
+            }
+            sprintf(buffer, "STRING(%s)", sv.string_val->string_val);
             break;
         default:
             sprintf(buffer, "UNKNOWN");

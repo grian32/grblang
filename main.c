@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "bytecode_emit.h"
 #include "lexer.h"
@@ -23,10 +24,20 @@ void print_lexer(Lexer* l) {
     printf("%s\n", buffer);
 }
 
-int main(void) {
+int main(int argc, char* argv[]) {
     long src_len;
-    char* src = read_file("./test.grb", &src_len);
-    printf("from: %s\n", src);
+    if (argc != 2 && argc != 3) {
+        fprintf(stderr, "error: invalid number of arguments\n");
+        exit(1);
+    }
+    bool print_debug = false;
+    if (argc == 3 && strcmp(argv[2], "-p") == 0) {
+        print_debug = true;
+    }
+    char* src = read_file(argv[1], &src_len);
+    if (print_debug) {
+        printf("from: %s\n", src);
+    }
 
     Lexer l;
     lexer_init(&l, src);
@@ -39,21 +50,23 @@ int main(void) {
     resolver_init(&r);
     resolve(node, &r);
 
-    print_ast(node, 0, true);
+    if (print_debug) {
+        print_ast(node, 0, true);
+    }
 
     type_check(node, &r);
 
-    // BytecodeEmitter b;
-    // bytecode_init(&b);
-    // bytecode_gen(node, &b, &r);
+    BytecodeEmitter b;
+    bytecode_init(&b);
+    bytecode_gen(node, &b, &r);
 
-    // VM vm;
-    // vm_init(&vm, &b, r.count);
-    // vm_run(&vm);
+    VM vm;
+    vm_init(&vm, &b, r.count);
+    vm_run(&vm);
 
-    // char buffer[50];
-    // stack_value_string(vm.stack.data[vm.stack.top], buffer);
-    // printf("\nvm result: %s\n", buffer);
+    char buffer[50];
+    stack_value_string(vm.stack.data[vm.stack.top], true, buffer);
+    printf("%s\n", buffer);
 
-    // return 0;
+    return 0;
 }

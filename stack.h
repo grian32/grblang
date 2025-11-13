@@ -16,7 +16,7 @@ typedef struct {
     };
 } StackValue;
 
-void stack_value_string(StackValue sv, char buffer[50]);
+void stack_value_string(StackValue sv, bool simple, char buffer[50]);
 
 typedef struct {
     StackValue* data;
