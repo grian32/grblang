@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
 
     char buffer[50];
     stack_value_string(vm.stack.data[vm.stack.top], true, buffer);
-    printf("\n%s\n", buffer);
+    printf("%s\n", buffer);
 
     return 0;
 }

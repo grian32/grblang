@@ -1,0 +1,4 @@
+var string hi = "Hello, ";
+var string world = "World!"
+
+hi + world;
