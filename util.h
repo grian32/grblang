@@ -1,5 +1,6 @@
 #ifndef GRBLANG_UTIL_H
 #define GRBLANG_UTIL_H
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -28,6 +29,29 @@ static char* read_file(const char* filename, long* size_out) {
     fclose(f);
 
     return buffer;
+}
+
+void print_visible(char *str) {
+    while (*str) {
+        unsigned char c = *str;
+
+        if (isprint(c)) {
+            putchar(c);
+        }
+
+        else if (c < 32 || c == 127) {
+            if (c == 127) {
+                printf("^?");
+            } else {
+                printf("^%c", c + 64);
+            }
+        }
+        else {
+            printf("\\x%02X", c);
+        }
+
+        str++;
+    }
 }
 
 #endif //GRBLANG_UTIL_H

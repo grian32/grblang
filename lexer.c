@@ -157,6 +157,7 @@ void lex_parse_string(Lexer* l, char** str_out, const char** start_out, int* len
         str[i++] = l->current;
         lex_advance(l);
     }
+    str[i] = '\0';
 
     if (l->current != '"') {
         fprintf(stderr, "expected \" after string\n");
