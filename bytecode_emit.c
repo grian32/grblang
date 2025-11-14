@@ -57,7 +57,7 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b, Resolver* r) {
             emit_push_bool(b, node->bool_val);
             break;
         case AST_STRING:
-            emit_push_string(b, node->string.string_val, node->string.len);
+            emit_push_string(b, node->string.string_val);
             break;
         case AST_BINARY_OP:
             // need to output left/right differently from all other ops for and and or
@@ -370,9 +370,9 @@ void patch_int(BytecodeEmitter* b, int new_val, int starts_at) {
     b->code[starts_at + 1] = new_val & 0xFF;
 }
 
-void emit_push_string(BytecodeEmitter* b, char* str, int len) {
-    StringValue strv = {.string_val = strdup(str), .len = len};
-    StackValue sv = {.type = VALUE_STRING, .string_val = &strv};
+void emit_push_string(BytecodeEmitter* b, char* str) {
+    StringValue strv = {.string_val = strdup(str), .len = strlen(str)};
+    StackValue sv = {.type = VALUE_STRING, .string_val = strv};
 
     uint16_t idx = add_const(b, sv);
 

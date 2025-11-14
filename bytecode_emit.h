@@ -96,7 +96,7 @@ void emit_imod(BytecodeEmitter* b);
 
 void patch_int(BytecodeEmitter* b, int new_value, int starts_at);
 
-void emit_push_string(BytecodeEmitter* b, char* str, int len);
+void emit_push_string(BytecodeEmitter* b, char* str);
 void emit_sconcat(BytecodeEmitter* b);
 
 #endif //GRBLANG_BYTECODE_EMIT_H

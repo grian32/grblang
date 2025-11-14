@@ -3,8 +3,11 @@
 #include "parser.h"
 #include "stack.h"
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
 
 inline void vm_init(VM *vm, BytecodeEmitter *b, int num_locals) {
     stack_init(&vm->stack);
@@ -24,6 +27,13 @@ void vm_run(VM* vm) {
 
         switch (instruction) {
             case OP_PUSH: {
+                uint16_t idx = (vm->code[vm->pc] << 8) | vm->code[vm->pc + 1];
+                vm->pc += 2;
+                StackValue value = vm->constants[idx];
+                stack_push(&vm->stack, value);
+                break;
+            }
+            case OP_PUSH_STRING: {
                 uint16_t idx = (vm->code[vm->pc] << 8) | vm->code[vm->pc + 1];
                 vm->pc += 2;
                 StackValue value = vm->constants[idx];
@@ -203,6 +213,7 @@ void vm_run(VM* vm) {
                 stack_push(&vm->stack, sv);
                 break;
             case OP_BLOAD:
+            case OP_SLOAD:
             case OP_ILOAD: {
                 int slot = (vm->code[vm->pc] << 8) | vm->code[vm->pc + 1];
                 vm->pc += 2;
@@ -214,6 +225,7 @@ void vm_run(VM* vm) {
                 break;
             }
             case OP_BSTORE:
+            case OP_SSTORE:
             case OP_ISTORE: {
                 int slot = (vm->code[vm->pc] << 8) | vm->code[vm->pc + 1];
                 vm->pc += 2;
@@ -245,6 +257,32 @@ void vm_run(VM* vm) {
                 if (sv.bool_val) {
                     vm->pc += steps;
                 }
+                break;
+            }
+            case OP_SCONCAT: {
+                StackValue b = stack_pop(&vm->stack);
+                StackValue a = stack_pop(&vm->stack);
+
+                size_t len_a = a.string_val.len;
+                size_t len_b = b.string_val.len;
+
+                int len_result = len_a + len_b;
+
+                char* result = malloc((len_result + 1) * sizeof(char));
+                if (!result) {
+                    fprintf(stderr, "runtime error: failed to allocate memory during string concat\n");
+                    exit(1);
+                }
+
+                memcpy(result, a.string_val.string_val, len_a);
+                memcpy(result + len_a, b.string_val.string_val, len_b);
+                result[len_a + len_b] = '\0';
+
+                StringValue strv = {.string_val = result, .len = len_result};
+                StackValue sv = {.type=VALUE_STRING, .string_val = strv};
+
+                stack_push(&vm->stack, sv);
+
                 break;
             }
             default:
