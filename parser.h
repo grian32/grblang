@@ -156,4 +156,7 @@ void parse_block(Parser* p, int initial_capacity, TokenType end_tok, ASTNode*** 
 // to be used as a general entry point
 ASTNode* parse_program(Parser *p);
 
+// free_ast takes in, ideally the `AST_PROGRAM` node, frees recursively, at the earliest, this should be called after resolving, type checking & bytecode generation
+void free_ast(ASTNode* node);
+
 #endif //GRBLANG_PARSER_H

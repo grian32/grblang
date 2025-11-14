@@ -590,3 +590,71 @@ ASTNode* parse_while_stmt(Parser* p) {
 
     return make_while_statement(condition, statements, statements_count);
 }
+
+void free_ast(ASTNode* node) {
+    if (!node) return;
+
+    switch (node->type) {
+    case AST_INT:
+    case AST_BOOL:
+        break;
+    case AST_STRING:
+        free(node->string.string_val);
+        break;
+    case AST_BINARY_OP:
+        free_ast(node->binary_op.left);
+        free_ast(node->binary_op.right);
+        break;
+    case AST_COMPOUND_ASSIGNMENT:
+        free(node->compound_assignment.name);
+        free_ast(node->compound_assignment.value);
+        break;
+    case AST_UNARY_OP:
+        free_ast(node->unary_op.right);
+        break;
+    case AST_PROGRAM:
+        for (int i = 0; i < node->program.count; i++) {
+            free_ast(node->program.statements[i]);
+        }
+        free(node->program.statements);
+        break;
+    case AST_IF:
+        free_ast(node->if_stmt.condition);
+
+        for (int i = 0; i < node->if_stmt.success_count; i++) {
+            free_ast(node->if_stmt.success_statements[i]);
+        }
+        free(node->if_stmt.success_statements);
+
+        if (node->if_stmt.fail_statements) {
+            for (int i = 0; i < node->if_stmt.fail_count; i++) {
+                free_ast(node->if_stmt.fail_statements[i]);
+            }
+        }
+        free(node->if_stmt.fail_statements);
+        break;
+    case AST_WHILE:
+        free_ast(node->while_stmt.condition);
+
+        for (int i = 0; i < node->while_stmt.statements_count; i++) {
+            free_ast(node->while_stmt.statements[i]);
+        }
+        free(node->while_stmt.statements);
+        break;
+    case AST_VAR_DECL:
+        free_ast(node->var_decl.value);
+        free(node->var_decl.name);
+        break;
+    case AST_VAR_ASSIGN:
+        free_ast(node->var_assign.value);
+        free(node->var_assign.name);
+        break;
+    case AST_VAR_REF:
+        free(node->var_ref.name);
+        break;
+    default:
+      break;
+    }
+
+    free(node);
+}

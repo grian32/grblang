@@ -60,6 +60,8 @@ int main(int argc, char* argv[]) {
     bytecode_init(&b);
     bytecode_gen(node, &b, &r);
 
+    free_ast(node);
+
     VM vm;
     vm_init(&vm, &b, r.count);
     vm_run(&vm);
