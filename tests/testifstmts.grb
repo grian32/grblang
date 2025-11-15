@@ -1,0 +1,9 @@
+var bool x = true;
+
+x = !!x;
+
+if (x) {
+    3;
+} else {
+    4;
+};
