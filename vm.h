@@ -9,6 +9,7 @@ typedef struct {
     Stack stack;
 
     StackValue* constants;
+    int constants_size;
 
     StackValue* locals;
     int locals_size;

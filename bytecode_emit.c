@@ -374,6 +374,7 @@ void emit_push_string(BytecodeEmitter* b, char* str) {
     StringValue* strv = malloc(sizeof(StringValue));
     strv->string_val = strdup(str);
     strv->len = strlen(str);
+    strv->ref_count = 1;
     StackValue sv = {.type = VALUE_STRING, .string_val = strv};
 
     uint16_t idx = add_const(b, sv);

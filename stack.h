@@ -5,7 +5,11 @@
 typedef struct {
     char* string_val;
     int len;
+    int ref_count;
 } StringValue;
+
+void increment_ref(StringValue* strv);
+void decrement_ref(StringValue* strv);
 
 typedef struct {
     VarType type;

@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "bytecode_emit.h"
@@ -77,6 +78,7 @@ int main(int argc, char* argv[]) {
     printf("\n");
 
     vm_free(&vm);
+    free(src);
 
     return 0;
 }

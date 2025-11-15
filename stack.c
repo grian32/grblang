@@ -50,6 +50,9 @@ void stack_push(Stack* s, StackValue val) {
         }
         s->data = new_data;
     }
+    if (val.type == VALUE_STRING) {
+        increment_ref(val.string_val);
+    }
     s->data[++s->top] = val;
 }
 
@@ -58,7 +61,12 @@ StackValue stack_pop(Stack* s) {
         fprintf(stderr, "stack underflow\n");
         exit(1);
     }
-    return s->data[s->top--];
+
+    StackValue sv = s->data[s->top--];
+    if (sv.type == VALUE_STRING) {
+        decrement_ref(sv.string_val);
+    }
+    return sv;
 }
 
 StackValue stack_peek(Stack* s) {
@@ -67,4 +75,20 @@ StackValue stack_peek(Stack* s) {
         exit(1);
     }
     return s->data[s->top];
+}
+
+void increment_ref(StringValue* strv) {
+    if (strv) {
+        strv->ref_count++;
+    }
+}
+
+void decrement_ref(StringValue* strv) {
+    if (strv) {
+        strv->ref_count--;
+        if (strv->ref_count == 0) {
+            free(strv->string_val);
+            free(strv);
+        }
+    }
 }

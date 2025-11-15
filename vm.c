@@ -1,5 +1,6 @@
 #include "vm.h"
 #include "bytecode_emit.h"
+#include "lexer.h"
 #include "parser.h"
 #include "stack.h"
 
@@ -12,6 +13,7 @@
 void vm_init(VM *vm, BytecodeEmitter *b, int num_locals) {
     stack_init(&vm->stack);
     vm->constants = b->constants;
+    vm->constants_size = b->const_count;
     vm->code = b->code;
     vm->code_size = b->code_size;
 
@@ -278,9 +280,13 @@ void vm_run(VM* vm) {
                 memcpy(result + len_a, b.string_val->string_val, len_b);
                 result[len_a + len_b] = '\0';
 
+                decrement_ref(a.string_val);
+                decrement_ref(b.string_val);
+
                 StringValue* strv = malloc(sizeof(StringValue));
                 strv->string_val = result;
                 strv->len = len_result;
+                strv->ref_count = 1;
 
                 StackValue sv = {.type=VALUE_STRING, .string_val = strv};
 
@@ -296,6 +302,13 @@ void vm_run(VM* vm) {
 }
 
 void vm_free(VM* vm) {
+    for (int i = 0; i <= vm->stack.top; i++) {
+        if (vm->stack.data[i].type == VALUE_STRING) {
+            free(vm->stack.data[i].string_val->string_val);
+            free(vm->stack.data[i].string_val);
+        }
+    }
+
     free(vm->constants);
     free(vm->locals);
     free(vm->code);

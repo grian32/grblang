@@ -92,8 +92,12 @@ void token_string(Token t, char buffer[50]) {
 }
 
 void lex_advance(Lexer* lex) {
-    lex->pos++;
-    lex->current = lex->src[lex->pos];
+    if (lex->pos < strlen(lex->src)) {
+        lex->pos++;
+        lex->current = lex->src[lex->pos];
+    } else {
+        lex->current = '\0';
+    }
 }
 
 void lexer_init(Lexer* l, const char* src) {
