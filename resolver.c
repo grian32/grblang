@@ -127,3 +127,14 @@ void resolve(ASTNode* node, Resolver* r) {
             break;
     }
 }
+
+void free_resolver(Resolver* r) {
+    for (int i = 0; i < r->count; i++) {
+        free(r->names[i]);
+    }
+    free(r->names);
+
+    free(r->types);
+
+    // r itself is not free'd here as it's intended to be initalized as a stack value and as such will crash if we try to free it
+}

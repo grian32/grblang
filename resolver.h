@@ -17,4 +17,7 @@ int resolver_lookup(Resolver* r, char* name);
 
 void resolve(ASTNode* node, Resolver* r);
 
+// this can be used after the bytecode generation step as long as the number of locals is stored in a variable for the vm to use, this is reccomended
+void free_resolver(Resolver* r);
+
 #endif //GRBLANG_RESOLVER_H

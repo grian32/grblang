@@ -62,8 +62,13 @@ int main(int argc, char* argv[]) {
 
     free_ast(node);
 
+
+    int num_locals = r.count;
+
+    free_resolver(&r);
+
     VM vm;
-    vm_init(&vm, &b, r.count);
+    vm_init(&vm, &b, num_locals);
     vm_run(&vm);
 
     char buffer[50];
