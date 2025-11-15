@@ -22,4 +22,7 @@ void vm_init(VM* vm, BytecodeEmitter* b, int num_locals);
 
 void vm_run(VM* vm);
 
+// to be called after vm_run has finished execution
+void vm_free(VM* vm);
+
 #endif //GRBLANG_VIRTUAL_MACHINE_H

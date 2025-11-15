@@ -9,7 +9,7 @@
 #include <string.h>
 #include <sys/types.h>
 
-inline void vm_init(VM *vm, BytecodeEmitter *b, int num_locals) {
+void vm_init(VM *vm, BytecodeEmitter *b, int num_locals) {
     stack_init(&vm->stack);
     vm->constants = b->constants;
     vm->code = b->code;
@@ -290,4 +290,11 @@ void vm_run(VM* vm) {
                 exit(1);
         }
     }
+}
+
+void vm_free(VM* vm) {
+    free(vm->constants);
+    free(vm->locals);
+    free(vm->code);
+    free(vm->stack.data);
 }

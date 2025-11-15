@@ -76,5 +76,7 @@ int main(int argc, char* argv[]) {
     print_visible(buffer);
     printf("\n");
 
+    vm_free(&vm);
+
     return 0;
 }
