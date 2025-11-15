@@ -263,8 +263,8 @@ void vm_run(VM* vm) {
                 StackValue b = stack_pop(&vm->stack);
                 StackValue a = stack_pop(&vm->stack);
 
-                size_t len_a = a.string_val.len;
-                size_t len_b = b.string_val.len;
+                size_t len_a = a.string_val->len;
+                size_t len_b = b.string_val->len;
 
                 int len_result = len_a + len_b;
 
@@ -274,11 +274,14 @@ void vm_run(VM* vm) {
                     exit(1);
                 }
 
-                memcpy(result, a.string_val.string_val, len_a);
-                memcpy(result + len_a, b.string_val.string_val, len_b);
+                memcpy(result, a.string_val->string_val, len_a);
+                memcpy(result + len_a, b.string_val->string_val, len_b);
                 result[len_a + len_b] = '\0';
 
-                StringValue strv = {.string_val = result, .len = len_result};
+                StringValue* strv = malloc(sizeof(StringValue));
+                strv->string_val = result;
+                strv->len = len_result;
+
                 StackValue sv = {.type=VALUE_STRING, .string_val = strv};
 
                 stack_push(&vm->stack, sv);

@@ -12,7 +12,7 @@ typedef struct {
     union {
         int int_val;
         bool bool_val;
-        StringValue string_val;
+        StringValue* string_val;
     };
 } StackValue;
 

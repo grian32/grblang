@@ -22,10 +22,10 @@ void stack_value_string(StackValue sv, bool simple, char buffer[50]) {
             break;
         case VALUE_STRING:
             if (simple) {
-                sprintf(buffer, "%s", sv.string_val.string_val);
+                sprintf(buffer, "%s", sv.string_val->string_val);
                 break;
             }
-            sprintf(buffer, "STRING(%s)", sv.string_val.string_val);
+            sprintf(buffer, "STRING(%s)", sv.string_val->string_val);
             break;
         default:
             sprintf(buffer, "UNKNOWN");

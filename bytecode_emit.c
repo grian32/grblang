@@ -371,7 +371,9 @@ void patch_int(BytecodeEmitter* b, int new_val, int starts_at) {
 }
 
 void emit_push_string(BytecodeEmitter* b, char* str) {
-    StringValue strv = {.string_val = strdup(str), .len = strlen(str)};
+    StringValue* strv = malloc(sizeof(StringValue));
+    strv->string_val = strdup(str);
+    strv->len = strlen(str);
     StackValue sv = {.type = VALUE_STRING, .string_val = strv};
 
     uint16_t idx = add_const(b, sv);
