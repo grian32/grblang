@@ -358,6 +358,15 @@ Token lex_next(Lexer* l) {
         case '}':
             t.type = TOK_RBRACE;
             break;
+        case '[':
+            t.type = TOK_LBRACKET;
+            break;
+        case ']':
+            t.type = TOK_RBRACKET;
+            break;
+        case ',':
+            t.type = TOK_COMMA;
+            break;
         case '%':
             t.type = TOK_MODULO;
             break;

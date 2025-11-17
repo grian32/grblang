@@ -359,6 +359,10 @@ ASTNode* parse_primary(Parser* p) {
         return expr;
     }
 
+    if (p->curr.type == TOK_LBRACKET) {
+        return parse_array_literal(p);
+    }
+
     fprintf(stderr, "unexpected token %d in parse_primary\n", p->curr.type);
     exit(1);
 }
@@ -657,4 +661,32 @@ void free_ast(ASTNode* node) {
     }
 
     free(node);
+}
+
+ASTNode* parse_array_literal(Parser* p) {
+    parser_next(p);
+    int capacity = 128, size = 0;
+    ASTNode** exprs = malloc(sizeof(ASTNode*) * capacity);
+
+    while (p->curr.type != TOK_RBRACE) {
+        ASTNode* expr = parse_expr(p);
+        if (p->curr.type != TOK_COMMA) {
+            fprintf(stderr, "expected , after expression in array literal\n");
+            exit(1);
+        }
+
+        if (size >= capacity) {
+            capacity *= 2;
+            ASTNode** new_exprs = realloc(exprs, sizeof(ASTNode*) * capacity);
+            if (!new_exprs) {
+                fprintf(stderr, "failed to reallocate memory in parse_array_literal\n");
+                exit(1);
+            }
+            exprs = new_exprs;
+        }
+
+        exprs[size++] = expr;
+    }
+
+    return make_arr_literal(exprs, size);
 }

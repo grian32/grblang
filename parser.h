@@ -23,6 +23,7 @@ typedef enum {
     VALUE_INT,
     VALUE_BOOL,
     VALUE_STRING,
+    VALUE_ARRAY,
     VALUE_UNKNOWN,
 } VarType;
 
@@ -99,6 +100,12 @@ typedef struct ASTNode {
             char* string_val;
             int len;
         } string;
+
+        struct {
+            struct ASTNode** arr;
+            int len;
+            VarType type;
+        } array_literal;
     };
 } ASTNode;
 
@@ -132,6 +139,7 @@ ASTNode* make_while_statement(ASTNode* condition, ASTNode** statements, int stat
 ASTNode* make_var_decl(char* name, ASTNode* value, VarType type);
 ASTNode* make_var_assign(char* name, ASTNode* value);
 ASTNode* make_var_ref(char* name);
+ASTNode* make_arr_literal(ASTNode** exprs, int len);
 
 ASTNode* parse_compound_assignment(Parser* p);
 ASTNode* parse_logical_or(Parser* p);
@@ -146,6 +154,8 @@ ASTNode* parse_muldiv(Parser* p);
 ASTNode* parse_if_stmt(Parser* p);
 // assumes p.curr == tok_while on call
 ASTNode* parse_while_stmt(Parser* p);
+// assumes p.curr == [ on call
+ASTNode* parse_array_literal(Parser* p);
 
 /**
  * = highest precendence parse; to be used as a top-level entry point for parsing expression

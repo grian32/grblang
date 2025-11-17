@@ -47,7 +47,10 @@ typedef enum {
     TOK_STRING, // 34
     TOK_INT, // 35
     TOK_TYPE, // 36
-    TOK_EOF // 37
+    TOK_LBRACKET, // [ // 37
+    TOK_RBRACKET, // ] // 38
+    TOK_COMMA, // , // 39
+    TOK_EOF // 40
 } TokenType;
 
 typedef enum {
