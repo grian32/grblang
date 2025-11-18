@@ -455,31 +455,36 @@ ASTNode* parse_expr(Parser* p) {
     return parse_logical_or(p);
 }
 
+ASTNode* parse_var_decl(Parser* p) {
+    parser_next(p);
+    if (p->curr.type != TOK_TYPE) {
+        fprintf(stderr, "expected type ex:`bool`, `int` after `var` keyword in var declaration\n");
+        exit(1);
+    }
+    VarType var_type = data_to_var_type(p->curr.value.type_val);
+    parser_next(p);
+
+    if (p->curr.type != TOK_IDENT) {
+        fprintf(stderr, "expected identifier after type in var declaration\n");
+        exit(1);
+    }
+    char* name = p->curr.value.ident_val;
+    parser_next(p);
+
+    if (p->curr.type != TOK_ASSIGN) {
+        fprintf(stderr, "expected equals after type in var declaration\n");
+        exit(1);
+    }
+    parser_next(p);
+
+    ASTNode* val = parse_expr(p);
+    return make_var_decl(name, val, var_type);
+}
+
+
 ASTNode* parse_statement(Parser *p) {
     if (p->curr.type == TOK_VAR) {
-        parser_next(p);
-        if (p->curr.type != TOK_TYPE) {
-            fprintf(stderr, "expected type ex:`bool`, `int` after `var` keyword in var declaration\n");
-            exit(1);
-        }
-        VarType var_type = data_to_var_type(p->curr.value.type_val);
-        parser_next(p);
-
-        if (p->curr.type != TOK_IDENT) {
-            fprintf(stderr, "expected identifier after type in var declaration\n");
-            exit(1);
-        }
-        char* name = p->curr.value.ident_val;
-        parser_next(p);
-
-        if (p->curr.type != TOK_ASSIGN) {
-            fprintf(stderr, "expected equals after type in var declaration\n");
-            exit(1);
-        }
-        parser_next(p);
-
-        ASTNode* val = parse_expr(p);
-        return make_var_decl(name, val, var_type);
+        return parse_var_decl(p);
     }
 
     if (p->curr.type == TOK_IDENT && p->peek.type == TOK_ASSIGN) {

@@ -157,6 +157,8 @@ ASTNode* parse_if_stmt(Parser* p);
 ASTNode* parse_while_stmt(Parser* p);
 // assumes p.curr == [ on call
 ASTNode* parse_array_literal(Parser* p);
+// assumes p.curr == tok_var
+ASTNode* parse_var_decl(Parser* p);
 
 /**
  * = highest precendence parse; to be used as a top-level entry point for parsing expression
