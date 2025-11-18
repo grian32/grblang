@@ -219,6 +219,16 @@ ASTNode* make_string(char* str_val, int len) {
     return node;
 }
 
+ASTNode* make_arr_literal(ASTNode** exprs, int len) {
+    ASTNode* node = malloc(sizeof(ASTNode));
+
+    node->type = AST_ARRAY;
+    node->array_literal.arr = exprs;
+    node->array_literal.len = len;
+
+    return node;
+}
+
 ASTNode* make_binary_op(TokenType op, ASTNode* left, ASTNode* right) {
     ASTNode* node = malloc(sizeof(ASTNode));
     node->type = AST_BINARY_OP;

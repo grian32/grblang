@@ -14,6 +14,7 @@ typedef enum {
     AST_PROGRAM,
     AST_IF,
     AST_WHILE,
+    AST_ARRAY,
     AST_VAR_DECL,
     AST_VAR_ASSIGN,
     AST_VAR_REF,
