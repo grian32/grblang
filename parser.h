@@ -24,8 +24,13 @@ typedef enum {
     VALUE_INT,
     VALUE_BOOL,
     VALUE_STRING,
-    VALUE_ARRAY,
     VALUE_UNKNOWN,
+} BaseType;
+
+typedef struct {
+    BaseType base_type;
+    // -1 for non arrays
+    int nested;
 } VarType;
 
 char* var_type_string(VarType type);

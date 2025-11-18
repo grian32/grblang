@@ -55,7 +55,8 @@ char* op_string(TokenType op) {
 }
 
 char* var_type_string(VarType type) {
-    switch (type) {
+    // TODO: array shit
+    switch (type.base_type) {
     case VALUE_INT:
         return "int";
     case VALUE_BOOL:

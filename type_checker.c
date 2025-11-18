@@ -2,57 +2,62 @@
 #include "lexer.h"
 #include "parser.h"
 #include "resolver.h"
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 VarType get_expr_type(ASTNode* node, Resolver* r) {
-    if (!node) return VALUE_UNKNOWN;
+    VarType unknown_type = {.base_type = VALUE_UNKNOWN, .nested = -1};
+    if (!node) return unknown_type;
 
     switch (node->type) {
         case AST_INT:
-            return VALUE_INT;
+            VarType int_type = {.base_type = VALUE_INT, .nested = -1};
+            return int_type;
         case AST_BOOL:
-            return VALUE_BOOL;
+            VarType bool_type = {.base_type = VALUE_BOOL, .nested = -1};
+            return bool_type;
         case AST_STRING:
-            return VALUE_STRING;
+            VarType string_type = {.base_type = VALUE_STRING, .nested = -1};
+            return string_type;
         case AST_BINARY_OP: {
             TokenType op = node->binary_op.op;
-            VarType left_type = get_expr_type(node->binary_op.left, r);
-            VarType right_type = get_expr_type(node->binary_op.left, r);
+            BaseType left_type = get_expr_type(node->binary_op.left, r).base_type;
+            BaseType right_type = get_expr_type(node->binary_op.left, r).base_type;
             if (op == TOK_PLUS) {
                 if (left_type == VALUE_INT && right_type == VALUE_INT) {
-                    return VALUE_INT;
+                    return int_type;
                 } else if (left_type == VALUE_STRING && right_type == VALUE_STRING) {
-                    return VALUE_STRING;
+                    return string_type;
                 }
             }
 
             if (op == TOK_MINUS || op == TOK_MULT || op == TOK_DIV || op == TOK_MODULO) {
-                return VALUE_INT;
+                return int_type;
             } else if (op == TOK_LESS || op == TOK_GREATER || op == TOK_EQUALS || op == TOK_NOT_EQUALS || op == TOK_GREATER_EQUALS || op == TOK_LESS_EQUALS || op == TOK_AND || op == TOK_OR) {
-                return VALUE_BOOL;
+                return bool_type;
             }
-            return VALUE_UNKNOWN;
+            return unknown_type;
         }
         case AST_UNARY_OP: {
             TokenType op = node->unary_op.op;
             if (op == TOK_MINUS) {
-                return VALUE_INT;
+                return int_type;
             } else if (op == TOK_EXCLAM) {
-                return VALUE_BOOL;
+                return bool_type;
             }
-            return VALUE_UNKNOWN;
+            return unknown_type;
         }
         case AST_VAR_REF: {
             int slot = resolver_lookup(r, node->var_ref.name);
             if (slot == -1) {
-                return VALUE_UNKNOWN;
+                return unknown_type;
             } else {
                 return r->types[slot];
             }
         }
         default:
-            return VALUE_UNKNOWN;
+            return unknown_type;
     }
 }
 
@@ -64,8 +69,14 @@ void type_check(ASTNode *node, Resolver* r) {
         type_check(node->binary_op.left, r);
         type_check(node->binary_op.right, r);
 
-        VarType left_type = get_expr_type(node->binary_op.left, r);
-        VarType right_type = get_expr_type(node->binary_op.right, r);
+        VarType left_var_type = get_expr_type(node->binary_op.left, r);
+        VarType right_var_type = get_expr_type(node->binary_op.right, r);
+        if (left_var_type.nested != -1 || right_var_type.nested != -1) {
+            fprintf(stderr, "binary operation %s not allowed on array", op_string(node->binary_op.op));
+            exit(1);
+        }
+        VarType left_type = get_expr_type(node->binary_op.left, r).base_type;
+        VarType right_type = get_expr_type(node->binary_op.right, r).base_type;
         switch (node->binary_op.op) {
             case TOK_MINUS:
             case TOK_MULT:
