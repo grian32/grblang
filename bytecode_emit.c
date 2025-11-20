@@ -83,9 +83,9 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b, Resolver* r) {
             switch (node->binary_op.op) {
                 case TOK_PLUS: {
                     VarType leftType = get_expr_type(node->binary_op.left, r);
-                    if (leftType == VALUE_INT) {
+                    if (leftType.base_type == VALUE_INT && leftType.nested == -1) {
                         emit_iadd(b);
-                    } else {
+                    } else if (leftType.base_type == VALUE_STRING && leftType.nested == -1) {
                         emit_sconcat(b);
                     }
                     break;
@@ -101,18 +101,18 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b, Resolver* r) {
                 case TOK_EQUALS: {
                     // can just check the left node as type checker should catch cases where it's not the same type on both sides
                     VarType leftType = get_expr_type(node->binary_op.left, r);
-                    if (leftType == VALUE_INT) {
+                    if (leftType.base_type == VALUE_INT && leftType.nested == -1) {
                         emit_ieq(b);
-                    } else {
+                    } else if (leftType.base_type == VALUE_BOOL && leftType.nested == -1) {
                         emit_beq(b);
                     }
                     break;
                 }
                 case TOK_NOT_EQUALS: {
                     VarType leftType = get_expr_type(node->binary_op.left, r);
-                    if (leftType == VALUE_INT) {
+                    if (leftType.base_type == VALUE_INT && leftType.nested == -1) {
                         emit_ineq(b);
-                    } else {
+                    } else if (leftType.base_type == VALUE_BOOL && leftType.nested == -1) {
                         emit_bneq(b);
                     }
                     break;
@@ -227,7 +227,11 @@ void emit_byte(BytecodeEmitter* b, uint8_t val) {
 }
 
 void emit_store(BytecodeEmitter* b, VarType type, int slot) {
-    switch (type) {
+    if (type.nested != -1) {
+        fprintf(stderr, "unknown array type for store");
+        exit(1);
+    }
+    switch (type.base_type) {
     case VALUE_INT:
         emit_byte(b, OP_ISTORE);
         break;
@@ -246,10 +250,23 @@ void emit_store(BytecodeEmitter* b, VarType type, int slot) {
 }
 
 void emit_load(BytecodeEmitter* b, VarType type, int slot) {
-    if (type == VALUE_INT) {
+    if (type.nested != -1) {
+        fprintf(stderr, "unknown array type for store");
+        exit(1);
+    }
+    switch (type.base_type) {
+    case VALUE_INT:
         emit_byte(b, OP_ILOAD);
-    } else {
+        break;
+    case VALUE_BOOL:
         emit_byte(b, OP_BLOAD);
+        break;
+    case VALUE_STRING:
+        emit_byte(b, OP_SLOAD);
+        break;
+    case VALUE_UNKNOWN:
+        fprintf(stderr, "unknown value type for store");
+        break;
     }
     emit_byte(b, (slot>> 8) & 0xFF);
     emit_byte(b, slot & 0xFF);

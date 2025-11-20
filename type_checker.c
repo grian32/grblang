@@ -8,17 +8,17 @@
 
 VarType get_expr_type(ASTNode* node, Resolver* r) {
     VarType unknown_type = {.base_type = VALUE_UNKNOWN, .nested = -1};
+    VarType int_type = {.base_type = VALUE_INT, .nested = -1};
+    VarType bool_type = {.base_type = VALUE_BOOL, .nested = -1};
+    VarType string_type = {.base_type = VALUE_STRING, .nested = -1};
     if (!node) return unknown_type;
 
     switch (node->type) {
         case AST_INT:
-            VarType int_type = {.base_type = VALUE_INT, .nested = -1};
             return int_type;
         case AST_BOOL:
-            VarType bool_type = {.base_type = VALUE_BOOL, .nested = -1};
             return bool_type;
         case AST_STRING:
-            VarType string_type = {.base_type = VALUE_STRING, .nested = -1};
             return string_type;
         case AST_BINARY_OP: {
             TokenType op = node->binary_op.op;
@@ -75,8 +75,8 @@ void type_check(ASTNode *node, Resolver* r) {
             fprintf(stderr, "binary operation %s not allowed on array", op_string(node->binary_op.op));
             exit(1);
         }
-        VarType left_type = get_expr_type(node->binary_op.left, r).base_type;
-        VarType right_type = get_expr_type(node->binary_op.right, r).base_type;
+        BaseType left_type = get_expr_type(node->binary_op.left, r).base_type;
+        BaseType right_type = get_expr_type(node->binary_op.right, r).base_type;
         switch (node->binary_op.op) {
             case TOK_MINUS:
             case TOK_MULT:
@@ -89,8 +89,8 @@ void type_check(ASTNode *node, Resolver* r) {
                 if (left_type != VALUE_INT || right_type != VALUE_INT) {
                     fprintf(stderr, "error: cannot use %s operator on %s and %s\n",
                         op_string(node->binary_op.op),
-                        var_type_string(left_type),
-                        var_type_string(right_type)
+                        base_type_string(left_type),
+                        base_type_string(right_type)
                     );
                     exit(1);
                 }
@@ -102,8 +102,8 @@ void type_check(ASTNode *node, Resolver* r) {
                 ) {
                     fprintf(stderr, "error: cannot use %s operator on %s and %s\n",
                         op_string(node->binary_op.op),
-                        var_type_string(left_type),
-                        var_type_string(right_type)
+                        base_type_string(left_type),
+                        base_type_string(right_type)
                     );
                     exit(1);
                 }
@@ -116,8 +116,8 @@ void type_check(ASTNode *node, Resolver* r) {
                 ) {
                     fprintf(stderr, "error: cannot use %s operator on %s and %s\n",
                         op_string(node->binary_op.op),
-                        var_type_string(left_type),
-                        var_type_string(right_type)
+                        base_type_string(left_type),
+                        base_type_string(right_type)
                     );
                     exit(1);
                 }
@@ -127,8 +127,8 @@ void type_check(ASTNode *node, Resolver* r) {
                 if (left_type != VALUE_BOOL || right_type != VALUE_BOOL) {
                     fprintf(stderr, "error: cannot use %s operator on %s and %s\n",
                         op_string(node->binary_op.op),
-                        var_type_string(left_type),
-                        var_type_string(right_type)
+                        base_type_string(left_type),
+                        base_type_string(right_type)
                     );
                     exit(1);
                 }
@@ -140,16 +140,21 @@ void type_check(ASTNode *node, Resolver* r) {
     }
     case AST_UNARY_OP: {
         type_check(node->unary_op.right, r);
-        VarType right_type = get_expr_type(node->unary_op.right, r);
+        VarType right_var_type = get_expr_type(node->unary_op.right, r);
+        if (right_var_type.nested != -1) {
+            fprintf(stderr, "unary operation %s not allowed on array", op_string(node->binary_op.op));
+            exit(1);
+        }
+        BaseType right_type = right_var_type.base_type;
 
         if (node->unary_op.op == TOK_EXCLAM && right_type != VALUE_BOOL) {
             fprintf(stderr, "error: cannot use ! operator on %s\n",
-                var_type_string(right_type)
+                base_type_string(right_type)
             );
             exit(1);
         } else if (node->unary_op.op == TOK_MINUS && right_type != VALUE_INT) {
             fprintf(stderr, "error: cannot use unary - operator on %s\n",
-                var_type_string(right_type)
+                base_type_string(right_type)
             );
             exit(1);
         }
@@ -164,11 +169,15 @@ void type_check(ASTNode *node, Resolver* r) {
         type_check(node->var_decl.value, r);
         VarType var_type = node->var_type;
         VarType value_type = get_expr_type(node->var_decl.value, r);
-        if (var_type != value_type) {
+        if (var_type.base_type != value_type.base_type || var_type.nested != value_type.nested) {
+            char value_buffer[50];
+            char var_buffer[50];
+            var_type_string(value_type, value_buffer);
+            var_type_string(var_type, var_buffer);
             fprintf(stderr, "error: cannot assign %s to variable `%s` that was explicitly declared as type %s\n",
-                var_type_string(value_type),
+                value_buffer,
                 node->var_decl.name,
-                var_type_string(var_type)
+                var_buffer
             );
             exit(1);
         }
@@ -178,11 +187,15 @@ void type_check(ASTNode *node, Resolver* r) {
         type_check(node->var_assign.value, r);
         VarType var_type = node->var_type;
         VarType value_type = get_expr_type(node->var_assign.value, r);
-        if (var_type != value_type) {
+        if (var_type.base_type != value_type.base_type || var_type.nested != value_type.nested) {
+            char value_buffer[50];
+            char var_buffer[50];
+            var_type_string(value_type, value_buffer);
+            var_type_string(var_type, var_buffer);
             fprintf(stderr, "error: cannot assign %s to variable `%s` of type %s\n",
-                var_type_string(value_type),
+                value_buffer,
                 node->var_assign.name,
-                var_type_string(var_type)
+                var_buffer
             );
             exit(1);
         }
@@ -192,11 +205,15 @@ void type_check(ASTNode *node, Resolver* r) {
         type_check(node->compound_assignment.value, r);
         VarType var_type = node->var_type;
         VarType value_type = get_expr_type(node->compound_assignment.value, r);
-        if (var_type != value_type) {
+        if (var_type.base_type != value_type.base_type || var_type.nested != value_type.nested) {
+            char value_buffer[50];
+            char var_buffer[50];
+            var_type_string(value_type, value_buffer);
+            var_type_string(var_type, var_buffer);
             fprintf(stderr, "error: cannot assign %s to variable `%s` of type %s\n",
-                var_type_string(value_type),
+                value_buffer,
                 node->compound_assignment.name,
-                var_type_string(var_type)
+                var_buffer
             );
             exit(1);
         }
@@ -206,7 +223,7 @@ void type_check(ASTNode *node, Resolver* r) {
         type_check(node->if_stmt.condition, r);
         VarType condition_type = get_expr_type(node->if_stmt.condition, r);
 
-        if (condition_type != VALUE_BOOL) {
+        if (condition_type.base_type != VALUE_BOOL || condition_type.nested != -1) {
             fprintf(stderr, "error: cannot use a non-bool as if condition\n");
             exit(1);
         }
@@ -227,7 +244,7 @@ void type_check(ASTNode *node, Resolver* r) {
         type_check(node->while_stmt.condition, r);
         VarType condition_type = get_expr_type(node->while_stmt.condition, r);
 
-        if (condition_type != VALUE_BOOL) {
+        if (condition_type.base_type != VALUE_BOOL || condition_type.nested != -1) {
             fprintf(stderr, "error: cannot use a non-bool as while condition\n");
             exit(1);
         }

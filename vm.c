@@ -4,6 +4,8 @@
 #include "parser.h"
 #include "stack.h"
 
+#include <locale.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,6 +26,9 @@ void vm_init(VM *vm, BytecodeEmitter *b, int num_locals) {
 }
 
 void vm_run(VM* vm) {
+    VarType int_type = {.base_type = VALUE_INT, .nested = -1};
+    VarType bool_type = {.base_type = VALUE_BOOL, .nested = -1};
+    VarType string_type = {.base_type = VALUE_STRING, .nested = -1};
     while (vm->pc < vm->code_size) {
         uint8_t instruction = vm->code[vm->pc++];
 
@@ -43,33 +48,33 @@ void vm_run(VM* vm) {
                 break;
             }
             case OP_PUSH_TRUE: {
-                StackValue sv = {.type = VALUE_BOOL, .bool_val = true};
+                StackValue sv = {.type = bool_type, .bool_val = true};
                 stack_push(&vm->stack, sv);
                 break;
             }
             case OP_PUSH_FALSE: {
-                StackValue sv = {.type = VALUE_BOOL, .bool_val = false};
+                StackValue sv = {.type = bool_type, .bool_val = false};
                 stack_push(&vm->stack, sv);
                 break;
             }
             case OP_IADD: {
                 StackValue b = stack_pop(&vm->stack);
                 StackValue a = stack_pop(&vm->stack);
-                StackValue sv = {.type = VALUE_INT, .int_val = a.int_val + b.int_val};
+                StackValue sv = {.type = int_type, .int_val = a.int_val + b.int_val};
                 stack_push(&vm->stack, sv);
                 break;
             }
             case OP_ISUB: {
                 StackValue b = stack_pop(&vm->stack);
                 StackValue a = stack_pop(&vm->stack);
-                StackValue sv = {.type = VALUE_INT, .int_val = a.int_val - b.int_val};
+                StackValue sv = {.type = int_type, .int_val = a.int_val - b.int_val};
                 stack_push(&vm->stack, sv);
                 break;
             }
             case OP_IMUL: {
                 StackValue b = stack_pop(&vm->stack);
                 StackValue a = stack_pop(&vm->stack);
-                StackValue sv = {.type = VALUE_INT, .int_val = a.int_val * b.int_val};
+                StackValue sv = {.type = int_type, .int_val = a.int_val * b.int_val};
                 stack_push(&vm->stack, sv);
                 break;
             }
@@ -80,7 +85,7 @@ void vm_run(VM* vm) {
                     fprintf(stderr, "runtime error: division by 0 not allowed\n");
                     exit(1);
                 }
-                StackValue sv = {.type = VALUE_INT, .int_val = a.int_val / b.int_val};
+                StackValue sv = {.type = int_type, .int_val = a.int_val / b.int_val};
                 stack_push(&vm->stack, sv);
                 break;
             }
@@ -139,28 +144,28 @@ void vm_run(VM* vm) {
             case OP_IGT: {
                 StackValue b = stack_pop(&vm->stack);
                 StackValue a = stack_pop(&vm->stack);
-                StackValue sv = {.type = VALUE_BOOL, .bool_val = a.int_val > b.int_val};
+                StackValue sv = {.type = bool_type, .bool_val = a.int_val > b.int_val};
                 stack_push(&vm->stack, sv);
                 break;
             }
             case OP_IGTE: {
                 StackValue b = stack_pop(&vm->stack);
                 StackValue a = stack_pop(&vm->stack);
-                StackValue sv = {.type = VALUE_BOOL, .bool_val = a.int_val >= b.int_val};
+                StackValue sv = {.type = bool_type, .bool_val = a.int_val >= b.int_val};
                 stack_push(&vm->stack, sv);
                 break;
             }
             case OP_ILT: {
                 StackValue b = stack_pop(&vm->stack);
                 StackValue a = stack_pop(&vm->stack);
-                StackValue sv = {.type = VALUE_BOOL, .bool_val = a.int_val < b.int_val};
+                StackValue sv = {.type = bool_type, .bool_val = a.int_val < b.int_val};
                 stack_push(&vm->stack, sv);
                 break;
             }
             case OP_ILTE: {
                 StackValue b = stack_pop(&vm->stack);
                 StackValue a = stack_pop(&vm->stack);
-                StackValue sv = {.type = VALUE_BOOL, .bool_val = a.int_val <= b.int_val};
+                StackValue sv = {.type = bool_type, .bool_val = a.int_val <= b.int_val};
                 stack_push(&vm->stack, sv);
                 break;
             }
@@ -171,47 +176,47 @@ void vm_run(VM* vm) {
                     fprintf(stderr, "runtime error: division by 0 not allowed\n");
                     exit(1);
                 }
-                StackValue sv = {.type = VALUE_INT, .int_val = a.int_val % b.int_val};
+                StackValue sv = {.type = int_type, .int_val = a.int_val % b.int_val};
                 stack_push(&vm->stack, sv);
                 break;
             }
             case OP_IEQ: {
                 StackValue b = stack_pop(&vm->stack);
                 StackValue a = stack_pop(&vm->stack);
-                StackValue sv = {.type = VALUE_BOOL, .bool_val = a.int_val == b.int_val};
+                StackValue sv = {.type = bool_type, .bool_val = a.int_val == b.int_val};
                 stack_push(&vm->stack, sv);
                 break;
             }
             case OP_BEQ: {
                 StackValue b = stack_pop(&vm->stack);
                 StackValue a = stack_pop(&vm->stack);
-                StackValue sv = {.type = VALUE_BOOL, .bool_val = a.bool_val == b.bool_val};
+                StackValue sv = {.type = bool_type, .bool_val = a.bool_val == b.bool_val};
                 stack_push(&vm->stack, sv);
                 break;
             }
             case OP_INEQ: {
                 StackValue b = stack_pop(&vm->stack);
                 StackValue a = stack_pop(&vm->stack);
-                StackValue sv = {.type = VALUE_BOOL, .bool_val = a.int_val != b.int_val};
+                StackValue sv = {.type = bool_type, .bool_val = a.int_val != b.int_val};
                 stack_push(&vm->stack, sv);
                 break;
             }
             case OP_BNEQ: {
                 StackValue b = stack_pop(&vm->stack);
                 StackValue a = stack_pop(&vm->stack);
-                StackValue sv = {.type = VALUE_BOOL, .bool_val = a.bool_val != b.bool_val};
+                StackValue sv = {.type = bool_type, .bool_val = a.bool_val != b.bool_val};
                 stack_push(&vm->stack, sv);
                 break;
             }
             case OP_INEG: {
                 StackValue a = stack_pop(&vm->stack);
-                StackValue sv = {.type = VALUE_INT, .int_val = -a.int_val};
+                StackValue sv = {.type = int_type, .int_val = -a.int_val};
                 stack_push(&vm->stack, sv);
                 break;
             }
             case OP_NOT:
                 StackValue a = stack_pop(&vm->stack);
-                StackValue sv = {.type = VALUE_BOOL, .bool_val = !a.bool_val};
+                StackValue sv = {.type = bool_type, .bool_val = !a.bool_val};
                 stack_push(&vm->stack, sv);
                 break;
             case OP_BLOAD:
@@ -288,7 +293,7 @@ void vm_run(VM* vm) {
                 strv->len = len_result;
                 strv->ref_count = 1;
 
-                StackValue sv = {.type=VALUE_STRING, .string_val = strv};
+                StackValue sv = {.type=string_type, .string_val = strv};
 
                 stack_push(&vm->stack, sv);
 
@@ -303,7 +308,7 @@ void vm_run(VM* vm) {
 
 void vm_free(VM* vm) {
     for (int i = 0; i <= vm->stack.top; i++) {
-        if (vm->stack.data[i].type == VALUE_STRING) {
+        if (vm->stack.data[i].type.base_type == VALUE_STRING && vm->stack.data[i].type.nested == -1) {
             free(vm->stack.data[i].string_val->string_val);
             free(vm->stack.data[i].string_val);
         }

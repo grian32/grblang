@@ -33,7 +33,8 @@ typedef struct {
     int nested;
 } VarType;
 
-char* var_type_string(VarType type);
+char* base_type_string(BaseType type);
+void var_type_string(VarType type, char buffer[50]);
 
 // basically purely used in resolver for the type checker
 typedef struct {

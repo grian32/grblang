@@ -1,19 +1,24 @@
 #include "parser.h"
 #include "lexer.h"
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 VarType data_to_var_type(DataType tt) {
     switch (tt) {
         case DATA_INT:
-            return VALUE_INT;
+            VarType int_type = { .base_type = VALUE_INT, .nested = -1 };
+            return int_type;
         case DATA_BOOL:
-            return VALUE_BOOL;
+            VarType bool_type = { .base_type = VALUE_BOOL, .nested = -1 };
+            return bool_type;
         case DATA_STRING:
-            return VALUE_STRING;
+            VarType string_type = { .base_type = VALUE_STRING, .nested = -1 };
+            return string_type;
         default:
-            return VALUE_UNKNOWN;
+            VarType unknown_type = { .base_type = VALUE_UNKNOWN, .nested = -1 };
+            return unknown_type;
     }
 }
 
@@ -54,9 +59,9 @@ char* op_string(TokenType op) {
     }
 }
 
-char* var_type_string(VarType type) {
+char* base_type_string(BaseType type) {
     // TODO: array shit
-    switch (type.base_type) {
+    switch (type) {
     case VALUE_INT:
         return "int";
     case VALUE_BOOL:
@@ -67,6 +72,26 @@ char* var_type_string(VarType type) {
         return "unknown";
     default:
         return "fucked";
+    }
+}
+
+void var_type_string(VarType type, char buffer[50]) {
+    switch (type.base_type) {
+    case VALUE_INT:
+        sprintf(buffer, "VAR_TYPE_INT(NESTED=%d)", type.nested);
+        break;
+    case VALUE_BOOL:
+        sprintf(buffer, "VAR_TYPE_BOOL(NESTED=%d)", type.nested);
+        break;
+    case VALUE_STRING:
+        sprintf(buffer, "VAR_TYPE_STRING(NESTED=%d)", type.nested);
+        break;
+    case VALUE_UNKNOWN:
+        sprintf(buffer, "VAR_TYPE_UNKNOWN(NESTED=%d)", type.nested);
+        break;
+    default:
+        sprintf(buffer, "fucked");
+        break;
     }
 }
 
@@ -103,14 +128,17 @@ void print_ast(ASTNode* node, int indent, bool newline) {
             print_ast(node->binary_op.left, indent + 1, false);
             print_ast(node->binary_op.right, indent + 1, false);
             break;
-        case AST_COMPOUND_ASSIGNMENT:
+        case AST_COMPOUND_ASSIGNMENT: {
             printf("AST_COMPOUND_ASSIGN(slot=%d,%s%s", node->compound_assignment.slot, node->compound_assignment.name, op_string(node->compound_assignment.op));
             print_ast(node->compound_assignment.value, 0, false);
-            printf(";t=%s(%d))", var_type_string(node->var_type), node->var_type);
+            char buffer[50];
+            var_type_string(node->var_type, buffer);
+            printf(";t=%s(%d))", buffer, node->var_type.base_type);
             if (newline) {
                 printf("\n");
             }
             break;
+        }
         case AST_UNARY_OP:
             printf("AST_UNARY_OP(%c)",node->unary_op.op == TOK_MINUS ? '-' : '!');
             if (newline) {
@@ -162,28 +190,37 @@ void print_ast(ASTNode* node, int indent, bool newline) {
                 printf("\n");
             }
             break;
-        case AST_VAR_ASSIGN:
+        case AST_VAR_ASSIGN: {
             printf("AST_VAR_ASSIGN(slot=%d,%s=", node->var_assign.slot, node->var_assign.name);
             print_ast(node->var_assign.value, 0, false);
-            printf(";t=%s(%d))", var_type_string(node->var_type), node->var_type);
+            char buffer[50];
+            var_type_string(node->var_type, buffer);
+            printf(";t=%s(%d))", buffer, node->var_type.base_type);
             if (newline) {
                 printf("\n");
             }
             break;
-        case AST_VAR_DECL:
+        }
+        case AST_VAR_DECL: {
             printf("AST_VAR_DECL(slot=%d,%s=", node->var_assign.slot,node->var_decl.name);
             print_ast(node->var_decl.value, 0, false);
-            printf(";t=%s(%d))", var_type_string(node->var_type), node->var_type);
+            char buffer[50];
+            var_type_string(node->var_type, buffer);
+            printf(";t=%s(%d))", buffer, node->var_type.base_type);
             if (newline) {
                 printf("\n");
             }
             break;
-        case AST_VAR_REF:
-            printf("AST_VAR_REF(slot=%d,%s;t=%s(%d))", node->var_ref.slot, node->var_ref.name, var_type_string(node->var_type), node->var_type);
+        }
+        case AST_VAR_REF: {
+            char buffer[50];
+            var_type_string(node->var_type, buffer);
+            printf("AST_VAR_REF(slot=%d,%s;t=%s(%d))", node->var_ref.slot, node->var_ref.name, buffer, node->var_type.base_type);
             if (newline) {
                 printf("\n");
             }
             break;
+        }
         default:
             printf("unknown ast type: %d\n", node->type);
     }

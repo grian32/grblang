@@ -1,11 +1,16 @@
 #include "stack.h"
 #include "parser.h"
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 void stack_value_string(StackValue sv, bool simple, char buffer[50]) {
-    switch (sv.type) {
+    if (sv.type.nested != -1){
+        fprintf(stderr, "array types not supported in stack_value_string");
+        exit(1);
+    }
+    switch (sv.type.base_type) {
         case VALUE_INT:
             if (simple) {
                 sprintf(buffer, "%d", sv.int_val);
@@ -50,7 +55,7 @@ void stack_push(Stack* s, StackValue val) {
         }
         s->data = new_data;
     }
-    if (val.type == VALUE_STRING) {
+    if (val.type.base_type == VALUE_STRING && val.type.nested == -1) {
         increment_ref(val.string_val);
     }
     s->data[++s->top] = val;
@@ -63,7 +68,7 @@ StackValue stack_pop(Stack* s) {
     }
 
     StackValue sv = s->data[s->top--];
-    if (sv.type == VALUE_STRING) {
+    if (sv.type.base_type == VALUE_STRING && sv.type.nested == -1) {
         decrement_ref(sv.string_val);
     }
     return sv;
