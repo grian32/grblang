@@ -120,7 +120,6 @@ void resolve(ASTNode* node, Resolver* r) {
                 exit(1);
             }
             node->var_type = r->types[node->compound_assignment.slot];
-        break;
             break;
         case AST_UNARY_OP:
             resolve(node->unary_op.right, r);

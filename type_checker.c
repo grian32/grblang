@@ -20,6 +20,22 @@ VarType get_expr_type(ASTNode* node, Resolver* r) {
             return bool_type;
         case AST_STRING:
             return string_type;
+        case AST_ARRAY:
+            if (node->array_literal.len == 0) {
+                return unknown_type;
+            }
+            VarType first_elem_type = get_expr_type(node->array_literal.arr[0], r);
+            for (int i = 1; i < node->array_literal.len; i++) {
+                VarType elem_type = get_expr_type(node->array_literal.arr[0], r);
+                if (elem_type.base_type != first_elem_type.base_type || elem_type.nested != first_elem_type.nested) {
+                    fprintf(stderr, "error: array elements must be of the same type\n");
+                    exit(1);
+                }
+            }
+
+            VarType array_type = first_elem_type;
+            array_type.nested++;
+            return array_type;
         case AST_BINARY_OP: {
             TokenType op = node->binary_op.op;
             BaseType left_type = get_expr_type(node->binary_op.left, r).base_type;

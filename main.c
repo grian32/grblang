@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
         print_ast(node, 0, true);
     }
 
-    // type_check(node, &r);
+    type_check(node, &r);
 
     // BytecodeEmitter b;
     // bytecode_init(&b);
