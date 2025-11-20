@@ -1,4 +1,1 @@
-var string hello = "Hello, ";
-var string world = "World!";
-
-hello + world;
+var int[] x = 4;

@@ -502,6 +502,16 @@ ASTNode* parse_var_decl(Parser* p) {
     VarType var_type = data_to_var_type(p->curr.value.type_val);
     parser_next(p);
 
+    while (p->curr.type == TOK_LBRACKET) {
+        parser_next(p);
+        if (p->curr.type != TOK_RBRACKET) {
+            fprintf(stderr, "expected ] after [ in var decl type parsing");
+            exit(1);
+        }
+        parser_next(p);
+        var_type.nested++;
+    }
+
     if (p->curr.type != TOK_IDENT) {
         fprintf(stderr, "expected identifier after type in var declaration\n");
         exit(1);
