@@ -221,6 +221,20 @@ void print_ast(ASTNode* node, int indent, bool newline) {
             }
             break;
         }
+        case AST_ARRAY: {
+            printf("AST_ARRAY([");
+            for (int i = 0; i < node->array_literal.len; i++) {
+                print_ast(node->array_literal.arr[i], indent, false);
+                if (i != node->array_literal.len - 1) {
+                    printf(", ");
+                }
+            }
+            printf("])");
+            if (newline) {
+                printf("\n");
+            }
+            break;
+        }
         default:
             printf("unknown ast type: %d\n", node->type);
     }
@@ -731,13 +745,10 @@ ASTNode* parse_array_literal(Parser* p) {
     int capacity = 128, size = 0;
     ASTNode** exprs = malloc(sizeof(ASTNode*) * capacity);
 
-    while (p->curr.type != TOK_RBRACE) {
+    while (p->curr.type != TOK_RBRACKET) {
         ASTNode* expr = parse_expr(p);
-        if (p->curr.type != TOK_COMMA) {
-            fprintf(stderr, "expected , after expression in array literal\n");
-            exit(1);
-        }
 
+        // otherwise will crash on last elem expecting comma :SSSSS
         if (size >= capacity) {
             capacity *= 2;
             ASTNode** new_exprs = realloc(exprs, sizeof(ASTNode*) * capacity);
@@ -749,6 +760,16 @@ ASTNode* parse_array_literal(Parser* p) {
         }
 
         exprs[size++] = expr;
+
+        if (p->curr.type == TOK_RBRACKET) {
+            parser_next(p);
+            break;
+        }
+        if (p->curr.type != TOK_COMMA) {
+            fprintf(stderr, "expected , after expression in array literal\n");
+            exit(1);
+        }
+        parser_next(p);
     }
 
     return make_arr_literal(exprs, size);
