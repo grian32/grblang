@@ -235,6 +235,17 @@ void print_ast(ASTNode* node, int indent, bool newline) {
             }
             break;
         }
+        case AST_ARRAY_INDEX: {
+            printf("AST_ARRAY_INDEX(");
+            print_ast(node->array_index.array_expr, 0, false);
+            printf("[");
+            print_ast(node->array_index.index_expr, 0, false);
+            printf("])");
+            if (newline) {
+                printf("\n");
+            }
+            break;
+        }
         default:
             printf("unknown ast type: %d\n", node->type);
     }
@@ -279,6 +290,14 @@ ASTNode* make_arr_literal(ASTNode** exprs, int len) {
     node->array_literal.len = len;
 
     return node;
+}
+
+ASTNode* make_arr_index(ASTNode* var_ref, ASTNode* index_expr) {
+    ASTNode* node = malloc(sizeof(ASTNode));
+
+    node->type = AST_ARRAY_INDEX;
+    node->array_index.array_expr = var_ref;
+    node->array_index.index_expr = index_expr;
 }
 
 ASTNode* make_binary_op(TokenType op, ASTNode* left, ASTNode* right) {
@@ -406,7 +425,20 @@ ASTNode* parse_primary(Parser* p) {
     if (p->curr.type == TOK_IDENT) {
         char* name = p->curr.value.ident_val;
         parser_next(p);
-        return make_var_ref(name);
+        ASTNode* node = make_var_ref(name);
+
+        while (p->curr.type == TOK_LBRACKET) {
+            parser_next(p);
+            ASTNode* index_expr = parse_expr(p);
+            if (p->curr.type != TOK_RBRACKET) {
+                fprintf(stderr, "expected ] after [ in array index\n");
+                exit(1);
+            }
+            parser_next(p);
+            node = make_arr_index(node, index_expr);
+        }
+
+        return node;
     }
 
     if (p->curr.type == TOK_LPAREN) {

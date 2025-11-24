@@ -36,6 +36,7 @@ VarType get_expr_type(ASTNode* node, Resolver* r) {
             VarType array_type = first_elem_type;
             array_type.nested++;
             return array_type;
+
         case AST_BINARY_OP: {
             TokenType op = node->binary_op.op;
             BaseType left_type = get_expr_type(node->binary_op.left, r).base_type;
@@ -267,6 +268,19 @@ void type_check(ASTNode *node, Resolver* r) {
 
         for (int i = 0; i < node->while_stmt.statements_count; i++) {
             type_check(node->while_stmt.statements[i], r);
+        }
+    }
+    case AST_ARRAY_INDEX: {
+        type_check(node->array_index.array_expr, r);
+        if (node->array_index.array_expr->type != AST_VAR_REF && node->array_index.array_expr->type != AST_ARRAY_INDEX) {
+            fprintf(stderr, "error: array expression in array index node must be either variable reference or array index\n");
+            exit(1);
+        }
+
+        VarType index_expr = get_expr_type(node->array_index.index_expr, r);
+        if (index_expr.base_type != VALUE_INT || index_expr.nested != -1) {
+            fprintf(stderr, "error: index expression in array index node must be integer\n");
+            exit(1);
         }
     }
     default:

@@ -15,6 +15,7 @@ typedef enum {
     AST_IF,
     AST_WHILE,
     AST_ARRAY,
+    AST_ARRAY_INDEX,
     AST_VAR_DECL,
     AST_VAR_ASSIGN,
     AST_VAR_REF,
@@ -113,6 +114,11 @@ typedef struct ASTNode {
             int len;
             VarType type;
         } array_literal;
+
+        struct {
+            struct ASTNode* array_expr; // only AST_VAR_REF at this time
+            struct ASTNode* index_expr;
+        } array_index;
     };
 } ASTNode;
 
@@ -147,6 +153,7 @@ ASTNode* make_var_decl(char* name, ASTNode* value, VarType type);
 ASTNode* make_var_assign(char* name, ASTNode* value);
 ASTNode* make_var_ref(char* name);
 ASTNode* make_arr_literal(ASTNode** exprs, int len);
+ASTNode* make_arr_index(ASTNode* var_ref, ASTNode* index_expr);
 
 ASTNode* parse_compound_assignment(Parser* p);
 ASTNode* parse_logical_or(Parser* p);

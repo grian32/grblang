@@ -124,6 +124,15 @@ void resolve(ASTNode* node, Resolver* r) {
         case AST_UNARY_OP:
             resolve(node->unary_op.right, r);
             break;
+        case AST_ARRAY_INDEX:
+            resolve(node->array_index.array_expr, r);
+            resolve(node->array_index.index_expr, r);
+            break;
+        case AST_ARRAY:
+            for (int i = 0; i < node->array_literal.len; i++) {
+                resolve(node->array_literal.arr[i], r);
+            }
+            break;
     }
 }
 
