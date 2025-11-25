@@ -21,6 +21,7 @@ typedef enum {
     OP_PUSH,
     OP_PUSH_TRUE, // true
     OP_PUSH_FALSE, // false
+    OP_PUSH_ARRAY,
     OP_IADD,
     OP_IADDSTORE,
     OP_ISUB,

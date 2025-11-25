@@ -17,7 +17,7 @@ void bytecode_init(BytecodeEmitter* b) {
     b->code_size = 0;
     b->code_capacity = initial_capacity;
 
-    b->constants = malloc(initial_capacity * sizeof(int));
+    b->constants = malloc(initial_capacity * sizeof(StackValue));
     b->const_count = 0;
     b->const_capacity = initial_capacity;
 }
@@ -190,6 +190,16 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b, Resolver* r) {
             patch_int(b, b->code_size - (jmpn_idx + 2), jmpn_idx);
             break;
         }
+        case AST_ARRAY: {
+            for (int i = 0; i < node->array_literal.len; i++) {
+                bytecode_gen(node->array_literal.arr[i], b, r);
+            }
+
+            // TODO: convert all the other fucntions that just do this to this format to simplify.
+            emit_byte(b, OP_PUSH_ARRAY);
+            emit_byte(b, (node->array_literal.len>> 8) & 0xFF);
+            emit_byte(b, node->array_literal.len & 0xFF);
+        }
     }
 }
 
@@ -203,7 +213,8 @@ uint16_t add_const(BytecodeEmitter* b, StackValue val) {
 }
 
 void emit_push_int(BytecodeEmitter* b, int val) {
-    StackValue sv = {.type = VALUE_INT, .int_val = val};
+    VarType int_type = {.base_type = VALUE_INT, .nested = -1};
+    StackValue sv = {.type = int_type, .int_val = val};
     uint16_t idx = add_const(b, sv);
     emit_byte(b, OP_PUSH);
     emit_byte(b, (idx >> 8) & 0xFF);
@@ -392,7 +403,8 @@ void emit_push_string(BytecodeEmitter* b, char* str) {
     strv->string_val = strdup(str);
     strv->len = strlen(str);
     strv->ref_count = 1;
-    StackValue sv = {.type = VALUE_STRING, .string_val = strv};
+    VarType string_type = {.base_type = VALUE_STRING, .nested = -1};
+    StackValue sv = {.type = string_type , .string_val = strv};
 
     uint16_t idx = add_const(b, sv);
 
