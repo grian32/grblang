@@ -246,6 +246,17 @@ void print_ast(ASTNode* node, int indent, bool newline) {
             }
             break;
         }
+        case AST_ARRAY_INDEX_ASSIGN: {
+            printf("AST_ARRAY_INDEX_ASSIGN(");
+            print_ast(node->array_assign_expr.arr_index_expr, 0, false);
+            printf("=");
+            print_ast(node->array_assign_expr.value, 0, false);
+            printf(")");
+            if (newline) {
+                printf("\n");
+            }
+            break;
+        }
         default:
             printf("unknown ast type: %d\n", node->type);
     }
@@ -298,6 +309,18 @@ ASTNode* make_arr_index(ASTNode* var_ref, ASTNode* index_expr) {
     node->type = AST_ARRAY_INDEX;
     node->array_index.array_expr = var_ref;
     node->array_index.index_expr = index_expr;
+
+    return node;
+}
+
+ASTNode* make_arr_index_assign(ASTNode* arr_index, ASTNode* value) {
+    ASTNode* node = malloc(sizeof(ASTNode));
+
+    node->type = AST_ARRAY_INDEX_ASSIGN;
+    node->array_assign_expr.arr_index_expr = arr_index;
+    node->array_assign_expr.value = value;
+
+    return node;
 }
 
 ASTNode* make_binary_op(TokenType op, ASTNode* left, ASTNode* right) {
@@ -579,6 +602,32 @@ ASTNode* parse_var_decl(Parser* p) {
 ASTNode* parse_statement(Parser *p) {
     if (p->curr.type == TOK_VAR) {
         return parse_var_decl(p);
+    }
+
+    if (p->curr.type == TOK_IDENT && p->peek.type == TOK_LBRACKET) {
+        char* name = p->curr.value.ident_val;
+        parser_next(p);
+        ASTNode* node = make_var_ref(name);
+
+        while (p->curr.type == TOK_LBRACKET) {
+            parser_next(p);
+            ASTNode* index_expr = parse_expr(p);
+            if (p->curr.type != TOK_RBRACKET) {
+                fprintf(stderr, "expected ] after [ in array index\n");
+                exit(1);
+            }
+            parser_next(p);
+            node = make_arr_index(node, index_expr);
+        }
+
+        if (p->curr.type == TOK_ASSIGN) {
+            parser_next(p);
+            ASTNode* value = parse_expr(p);
+
+            return make_arr_index_assign(node, value);
+        } else {
+            return node;
+        }
     }
 
     if (p->curr.type == TOK_IDENT && p->peek.type == TOK_ASSIGN) {

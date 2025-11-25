@@ -2,6 +2,7 @@
 #include "lexer.h"
 #include "parser.h"
 #include "resolver.h"
+#include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,7 +37,6 @@ VarType get_expr_type(ASTNode* node, Resolver* r) {
             VarType array_type = first_elem_type;
             array_type.nested++;
             return array_type;
-
         case AST_BINARY_OP: {
             TokenType op = node->binary_op.op;
             BaseType left_type = get_expr_type(node->binary_op.left, r).base_type;
@@ -72,6 +72,15 @@ VarType get_expr_type(ASTNode* node, Resolver* r) {
             } else {
                 return r->types[slot];
             }
+        }
+        case AST_ARRAY_INDEX: {
+            VarType array_type = get_expr_type(node->array_index.array_expr, r);
+
+            if (array_type.nested < 0) {
+                return unknown_type;
+            }
+            array_type.nested--;
+            return array_type;
         }
         default:
             return unknown_type;
@@ -269,6 +278,7 @@ void type_check(ASTNode *node, Resolver* r) {
         for (int i = 0; i < node->while_stmt.statements_count; i++) {
             type_check(node->while_stmt.statements[i], r);
         }
+        break;
     }
     case AST_ARRAY_INDEX: {
         type_check(node->array_index.array_expr, r);
@@ -282,6 +292,25 @@ void type_check(ASTNode *node, Resolver* r) {
             fprintf(stderr, "error: index expression in array index node must be integer\n");
             exit(1);
         }
+        break;
+    }
+    case AST_ARRAY_INDEX_ASSIGN: {
+        type_check(node->array_assign_expr.arr_index_expr, r);
+        VarType type = get_expr_type(node->array_assign_expr.arr_index_expr, r);
+
+        VarType value_type = get_expr_type(node->array_assign_expr.value, r);
+        if (value_type.base_type != type.base_type || value_type.nested != type.nested) {
+            char value_buffer[50];
+            char type_buffer[50];
+            var_type_string(value_type, value_buffer);
+            var_type_string(type, type_buffer);
+            fprintf(stderr, "error: cannot assign %s via array index to value of type %s\n",
+                value_buffer,
+                type_buffer
+            );
+            exit(1);
+        }
+        break;
     }
     default:
         break;
