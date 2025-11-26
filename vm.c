@@ -4,6 +4,7 @@
 #include "parser.h"
 #include "stack.h"
 
+#include <alloca.h>
 #include <locale.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -54,6 +55,31 @@ void vm_run(VM* vm) {
             }
             case OP_PUSH_FALSE: {
                 StackValue sv = {.type = bool_type, .bool_val = false};
+                stack_push(&vm->stack, sv);
+                break;
+            }
+            case OP_PUSH_ARRAY: {
+                int len = (vm->code[vm->pc] << 8) | vm->code[vm->pc + 1];
+                vm->pc += 2;
+
+                ArrayValue* arrv = malloc(sizeof(ArrayValue));
+                arrv->len = len;
+                arrv->ref_count = 0;
+                arrv->arr_val = malloc(sizeof(StackValue) * len);
+
+                for (int i = len - 1; i >= 0; i--) {
+                    StackValue val = stack_pop(&vm->stack);
+                    arrv->arr_val[i] = val;
+                }
+
+                VarType arr_type = {.base_type = VALUE_UNKNOWN, .nested = -1};
+                if (arrv->len > 0) {
+                    arr_type = arrv->arr_val[0].type;
+                    arr_type.nested++;
+                }
+
+                StackValue sv = {.type = arr_type, .array_val = arrv};
+
                 stack_push(&vm->stack, sv);
                 break;
             }

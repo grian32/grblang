@@ -21,7 +21,7 @@ typedef struct {
     };
 } StackValue;
 
-typedef struct {
+typedef struct ArrayValue {
     StackValue* arr_val;
     int len;
     int ref_count;
@@ -30,7 +30,7 @@ typedef struct {
 void increment_ref_arr(ArrayValue* arrv);
 void decrement_ref_arr(ArrayValue* arrv);
 
-void stack_value_string(StackValue sv, bool simple, char buffer[50]);
+void stack_value_string(StackValue sv, bool simple, char* buffer, size_t bufsize, size_t* len);
 
 typedef struct {
     StackValue* data;

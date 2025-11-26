@@ -5,35 +5,43 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void stack_value_string(StackValue sv, bool simple, char buffer[50]) {
+void stack_value_string(StackValue sv, bool simple, char* buffer, size_t bufsize, size_t* len) {
     if (sv.type.nested != -1){
-        fprintf(stderr, "array types not supported in stack_value_string");
-        exit(1);
+        *len += snprintf(buffer + *len, bufsize - *len, "[");
+        for (int i = 0; i < sv.array_val->len; i++) {
+            stack_value_string(sv.array_val->arr_val[i], simple, buffer, bufsize, len);
+            if (i != sv.array_val->len - 1) {
+                *len += snprintf(buffer + *len, bufsize - *len, ", ");
+            }
+        }
+        *len += snprintf(buffer + *len, bufsize - *len, "]");
+        return;
     }
+
     switch (sv.type.base_type) {
         case VALUE_INT:
             if (simple) {
-                sprintf(buffer, "%d", sv.int_val);
+                *len += snprintf(buffer + *len, bufsize - *len, "%d", sv.int_val);
                 break;
             }
-            sprintf(buffer, "INT(%d)", sv.int_val);
+            *len += snprintf(buffer + *len, bufsize - *len, "INT(%d)", sv.int_val);
             break;
         case VALUE_BOOL:
             if (simple) {
-                sprintf(buffer, "%s", sv.bool_val ? "true" : "false");
+                *len += snprintf(buffer + *len, bufsize - *len, "%s", sv.bool_val ? "true" : "false");
                 break;
             }
-            sprintf(buffer, "BOOL(%s)", sv.bool_val ? "true" : "false");
+            *len += snprintf(buffer + *len, bufsize - *len, "BOOL(%s)", sv.bool_val ? "true" : "false");
             break;
         case VALUE_STRING:
             if (simple) {
-                sprintf(buffer, "%s", sv.string_val->string_val);
+                *len += snprintf(buffer + *len, bufsize - *len, "%s", sv.string_val->string_val);
                 break;
             }
-            sprintf(buffer, "STRING(%s)", sv.string_val->string_val);
+            *len += snprintf(buffer + *len, bufsize - *len, "STRING(%s)", sv.string_val->string_val);
             break;
         default:
-            sprintf(buffer, "UNKNOWN");
+            *len += snprintf(buffer + *len, bufsize - *len, "UNKNOWN");
             break;
     }
 }
@@ -41,7 +49,7 @@ void stack_value_string(StackValue sv, bool simple, char buffer[50]) {
 void stack_init(Stack* s) {
     int initial_capacity = 128;
     s->data = malloc(initial_capacity* sizeof(StackValue));
-    s->top = 0;
+    s->top = -1;
     s->capacity = initial_capacity;
 }
 
@@ -57,6 +65,8 @@ void stack_push(Stack* s, StackValue val) {
     }
     if (val.type.base_type == VALUE_STRING && val.type.nested == -1) {
         increment_ref(val.string_val);
+    } else if (val.type.nested != -1) {
+        increment_ref_arr(val.array_val);
     }
     s->data[++s->top] = val;
 }
@@ -70,6 +80,8 @@ StackValue stack_pop(Stack* s) {
     StackValue sv = s->data[s->top--];
     if (sv.type.base_type == VALUE_STRING && sv.type.nested == -1) {
         decrement_ref(sv.string_val);
+    } else if (sv.type.nested != -1) {
+        decrement_ref_arr(sv.array_val);
     }
     return sv;
 }

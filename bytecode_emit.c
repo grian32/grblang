@@ -239,7 +239,7 @@ void emit_byte(BytecodeEmitter* b, uint8_t val) {
 
 void emit_store(BytecodeEmitter* b, VarType type, int slot) {
     if (type.nested != -1) {
-        fprintf(stderr, "unknown array type for store");
+        fprintf(stderr, "unknown array type for store\n");
         exit(1);
     }
     switch (type.base_type) {
