@@ -239,8 +239,8 @@ void emit_byte(BytecodeEmitter* b, uint8_t val) {
 
 void emit_store(BytecodeEmitter* b, VarType type, int slot) {
     if (type.nested != -1) {
-        fprintf(stderr, "unknown array type for store\n");
-        exit(1);
+        emit_byte(b, OP_ARRSTORE);
+        goto emit_slot;
     }
     switch (type.base_type) {
     case VALUE_INT:
@@ -256,14 +256,15 @@ void emit_store(BytecodeEmitter* b, VarType type, int slot) {
         fprintf(stderr, "unknown value type for store");
         break;
     }
+    emit_slot:
     emit_byte(b, (slot>> 8) & 0xFF);
     emit_byte(b, slot & 0xFF);
 }
 
 void emit_load(BytecodeEmitter* b, VarType type, int slot) {
     if (type.nested != -1) {
-        fprintf(stderr, "unknown array type for store");
-        exit(1);
+        emit_byte(b, OP_ARRLOAD);
+        goto emit_slot;
     }
     switch (type.base_type) {
     case VALUE_INT:
@@ -279,6 +280,7 @@ void emit_load(BytecodeEmitter* b, VarType type, int slot) {
         fprintf(stderr, "unknown value type for store");
         break;
     }
+    emit_slot:
     emit_byte(b, (slot>> 8) & 0xFF);
     emit_byte(b, slot & 0xFF);
 }

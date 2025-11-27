@@ -44,6 +44,8 @@ typedef enum {
     OP_ILOAD,
     OP_BSTORE, // bool
     OP_BLOAD,
+    OP_ARRSTORE, // arrays
+    OP_ARRLOAD,
     OP_NOT,
     OP_JMPN,
     OP_JMPT,

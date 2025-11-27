@@ -247,6 +247,7 @@ void vm_run(VM* vm) {
                 break;
             case OP_BLOAD:
             case OP_SLOAD:
+            case OP_ARRLOAD:
             case OP_ILOAD: {
                 int slot = (vm->code[vm->pc] << 8) | vm->code[vm->pc + 1];
                 vm->pc += 2;
@@ -259,6 +260,7 @@ void vm_run(VM* vm) {
             }
             case OP_BSTORE:
             case OP_SSTORE:
+            case OP_ARRSTORE:
             case OP_ISTORE: {
                 int slot = (vm->code[vm->pc] << 8) | vm->code[vm->pc + 1];
                 vm->pc += 2;

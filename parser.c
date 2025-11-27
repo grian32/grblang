@@ -565,6 +565,7 @@ ASTNode* parse_expr(Parser* p) {
 ASTNode* parse_var_decl(Parser* p) {
     parser_next(p);
     if (p->curr.type != TOK_TYPE) {
+        printf("%d\n", p->curr.type);
         fprintf(stderr, "expected type ex:`bool`, `int` after `var` keyword in var declaration\n");
         exit(1);
     }

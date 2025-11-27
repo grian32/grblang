@@ -112,14 +112,15 @@ void decrement_ref(StringValue* strv) {
 
 void increment_ref_arr(ArrayValue* arrv) {
     if (!arrv) return;
-    arrv->ref_count++;
+    if (arrv->ref_count) {
+        arrv->ref_count++;
+    }
 
     for (int i = 0; i < arrv->len; i++) {
-        StackValue* el = &arrv->arr_val[i];
-        if (el->type.nested != -1 && el->array_val) {
-            increment_ref_arr((ArrayValue*)el->array_val);
-        } else if (el->type.base_type == VALUE_STRING && el->type.nested == -1 && el->string_val) {
-            increment_ref(el->string_val);
+        if (arrv->arr_val && arrv->arr_val[i].array_val && arrv->arr_val[i].type.nested != -1) {
+            increment_ref_arr(arrv->arr_val[i].array_val);
+        } else if (arrv->arr_val && arrv->arr_val[i].string_val && arrv->arr_val[i].type.base_type == VALUE_STRING && arrv->arr_val[i].type.nested == -1) {
+            increment_ref(arrv->arr_val[i].string_val);
         }
     }
 }
@@ -130,11 +131,10 @@ void decrement_ref_arr(ArrayValue* arrv) {
 
     if (arrv->ref_count == 0) {
         for (int i = 0; i < arrv->len; i++) {
-            StackValue* el = &arrv->arr_val[i];
-            if (el->type.nested != -1 && el->array_val) {
-                decrement_ref_arr((ArrayValue*)el->array_val);
-            } else if (el->type.base_type == VALUE_STRING && el->type.nested == -1 && el->string_val) {
-                decrement_ref(el->string_val);
+            if (arrv->arr_val && arrv->arr_val[i].array_val && arrv->arr_val[i].type.nested != -1) {
+                decrement_ref_arr(arrv->arr_val[i].array_val);
+            } else if (arrv->arr_val && arrv->arr_val[i].string_val && arrv->arr_val[i].type.base_type == VALUE_STRING && arrv->arr_val[i].type.nested == -1) {
+                decrement_ref(arrv->arr_val[i].string_val);
             }
         }
         free(arrv->arr_val);
