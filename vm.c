@@ -324,20 +324,19 @@ void vm_run(VM* vm) {
                 StackValue sv = {.type=string_type, .string_val = strv};
 
                 stack_push(&vm->stack, sv);
-
                 break;
             }
             case OP_ARRLOADIDX: {
                 StackValue array = stack_pop(&vm->stack);
                 StackValue idx = stack_pop(&vm->stack);
                 if (idx.int_val >= array.array_val->len) {
-                    fprintf(stderr, "runtime error: idx %d oob on array of len %d", idx.int_val, array.array_val->len);
+                    fprintf(stderr, "runtime error: idx %d oob on array of len %d\n", idx.int_val, array.array_val->len);
                     exit(1);
                 }
 
-                printf("%d", idx.int_val);
                 StackValue sv = array.array_val->arr_val[idx.int_val];
                 stack_push(&vm->stack, sv);
+                break;
             }
             default:
                 fprintf(stderr, "unknown opcode: %d\n", instruction);
