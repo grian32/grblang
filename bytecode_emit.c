@@ -195,10 +195,14 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b, Resolver* r) {
                 bytecode_gen(node->array_literal.arr[i], b, r);
             }
 
-            // TODO: convert all the other fucntions that just do this to this format to simplify.
             emit_byte(b, OP_PUSH_ARRAY);
             emit_byte(b, (node->array_literal.len>> 8) & 0xFF);
             emit_byte(b, node->array_literal.len & 0xFF);
+        }
+        case AST_ARRAY_INDEX: {
+            emit_byte(b, OP_ARRLOADIDX);
+            bytecode_gen(node->array_index.index_expr, b, r);
+            bytecode_gen(node->array_index.array_expr, b, r);
         }
     }
 }
