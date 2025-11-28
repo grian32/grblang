@@ -51,9 +51,9 @@ int main(int argc, char* argv[]) {
     resolver_init(&r);
     resolve(node, &r);
 
-    // if (print_debug) {
-    //     print_ast(node, 0, true);
-    // }
+    if (print_debug) {
+        print_ast(node, 0, true);
+    }
 
     type_check(node, &r);
 

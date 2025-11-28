@@ -55,6 +55,7 @@ typedef enum {
     OP_SSTORE,
     OP_SLOAD,
     OP_ARRLOADIDX,
+    OP_ARRSTOREIDX,
 } BytecodeOp;
 
 void bytecode_init(BytecodeEmitter* b);

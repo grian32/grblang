@@ -206,6 +206,13 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b, Resolver* r) {
             emit_byte(b, OP_ARRLOADIDX);
             break;
         }
+        case AST_ARRAY_INDEX_ASSIGN: {
+            bytecode_gen(node->array_assign_expr.arr_index_expr->array_index.index_expr, b, r);
+            bytecode_gen(node->array_assign_expr.arr_index_expr->array_index.array_expr, b, r);
+            bytecode_gen(node->array_assign_expr.value, b, r);
+            emit_byte(b, OP_ARRSTOREIDX);
+            break;
+        }
     }
 }
 
