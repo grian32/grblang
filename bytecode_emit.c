@@ -84,36 +84,36 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b, Resolver* r) {
                 case TOK_PLUS: {
                     VarType leftType = get_expr_type(node->binary_op.left, r);
                     if (leftType.base_type == VALUE_INT && leftType.nested == -1) {
-                        emit_iadd(b);
+                        emit_byte(b, OP_IADD);
                     } else if (leftType.base_type == VALUE_STRING && leftType.nested == -1) {
-                        emit_sconcat(b);
+                        emit_byte(b, OP_SCONCAT);
                     }
                     break;
                 }
-                case TOK_MINUS: emit_isub(b); break;
-                case TOK_MULT: emit_imul(b); break;
-                case TOK_DIV: emit_idiv(b); break;
-                case TOK_GREATER: emit_igt(b); break;
-                case TOK_LESS: emit_ilt(b); break;
-                case TOK_GREATER_EQUALS: emit_igte(b); break;
-                case TOK_LESS_EQUALS: emit_ilte(b); break;
-                case TOK_MODULO: emit_imod(b); break;
+                case TOK_MINUS: emit_byte(b, OP_ISUB); break;
+                case TOK_MULT: emit_byte(b, OP_IMUL); break;
+                case TOK_DIV: emit_byte(b, OP_IDIV); break;
+                case TOK_GREATER: emit_byte(b, OP_IGT); break;
+                case TOK_LESS: emit_byte(b, OP_ILT); break;
+                case TOK_GREATER_EQUALS: emit_byte(b, OP_IGTE); break;
+                case TOK_LESS_EQUALS: emit_byte(b, OP_ILTE); break;
+                case TOK_MODULO: emit_byte(b, OP_IMOD); break;
                 case TOK_EQUALS: {
                     // can just check the left node as type checker should catch cases where it's not the same type on both sides
                     VarType leftType = get_expr_type(node->binary_op.left, r);
                     if (leftType.base_type == VALUE_INT && leftType.nested == -1) {
-                        emit_ieq(b);
+                        emit_byte(b, OP_IEQ);
                     } else if (leftType.base_type == VALUE_BOOL && leftType.nested == -1) {
-                        emit_beq(b);
+                        emit_byte(b, OP_BEQ);
                     }
                     break;
                 }
                 case TOK_NOT_EQUALS: {
                     VarType leftType = get_expr_type(node->binary_op.left, r);
                     if (leftType.base_type == VALUE_INT && leftType.nested == -1) {
-                        emit_ineq(b);
+                        emit_byte(b, OP_INEQ);
                     } else if (leftType.base_type == VALUE_BOOL && leftType.nested == -1) {
-                        emit_bneq(b);
+                        emit_byte(b, OP_BEQ);
                     }
                     break;
                 }
@@ -124,8 +124,8 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b, Resolver* r) {
             bytecode_gen(node->unary_op.right, b, r);
 
             switch (node->unary_op.op) {
-                case TOK_MINUS: emit_neg(b); break;
-                case TOK_EXCLAM: emit_not(b); break;
+                case TOK_MINUS: emit_byte(b, OP_INEG); break;
+                case TOK_EXCLAM: emit_byte(b, OP_NOT); break;
                 default: break;
             }
             break;
@@ -285,42 +285,6 @@ void emit_load(BytecodeEmitter* b, VarType type, int slot) {
     emit_byte(b, slot & 0xFF);
 }
 
-void emit_iadd(BytecodeEmitter* b) {
-    emit_byte(b, OP_IADD);
-}
-
-void emit_isub(BytecodeEmitter* b) {
-    emit_byte(b, OP_ISUB);
-}
-
-void emit_imul(BytecodeEmitter* b) {
-    emit_byte(b, OP_IMUL);
-}
-
-void emit_idiv(BytecodeEmitter* b) {
-    emit_byte(b, OP_IDIV);
-}
-
-void emit_igt(BytecodeEmitter* b) {
-    emit_byte(b, OP_IGT);
-}
-
-void emit_igte(BytecodeEmitter* b) {
-    emit_byte(b, OP_IGTE);
-}
-
-void emit_ilt(BytecodeEmitter* b) {
-    emit_byte(b, OP_ILT);
-}
-
-void emit_ilte(BytecodeEmitter* b) {
-    emit_byte(b, OP_ILTE);
-}
-
-void emit_ieq(BytecodeEmitter* b) {
-    emit_byte(b, OP_IEQ);
-}
-
 void emit_icompound_assignment(BytecodeEmitter* b, TokenType op, int slot) {
     switch (op) {
         case TOK_PLUS_EQUALS:
@@ -342,26 +306,6 @@ void emit_icompound_assignment(BytecodeEmitter* b, TokenType op, int slot) {
     }
     emit_byte(b, (slot>> 8) & 0xFF);
     emit_byte(b, slot & 0xFF);
-}
-
-void emit_beq(BytecodeEmitter* b) {
-    emit_byte(b, OP_BEQ);
-}
-
-void emit_ineq(BytecodeEmitter* b) {
-    emit_byte(b, OP_INEQ);
-}
-
-void emit_bneq(BytecodeEmitter* b) {
-    emit_byte(b, OP_BNEQ);
-}
-
-void emit_neg(BytecodeEmitter* b) {
-    emit_byte(b, OP_INEG);
-}
-
-void emit_not(BytecodeEmitter* b) {
-    emit_byte(b, OP_NOT);
 }
 
 int emit_jmpn(BytecodeEmitter* b, int steps) {
@@ -391,10 +335,6 @@ int emit_jmp(BytecodeEmitter* b, int steps) {
     return idx;
 }
 
-void emit_imod(BytecodeEmitter* b) {
-    emit_byte(b, OP_IMOD);
-}
-
 void patch_int(BytecodeEmitter* b, int new_val, int starts_at) {
     b->code[starts_at] = (new_val >> 8) & 0xFF;
     b->code[starts_at + 1] = new_val & 0xFF;
@@ -413,8 +353,4 @@ void emit_push_string(BytecodeEmitter* b, char* str) {
     emit_byte(b, OP_PUSH_STRING);
     emit_byte(b, (idx >> 8) & 0xFF);
     emit_byte(b, idx & 0xFF);
-}
-
-void emit_sconcat(BytecodeEmitter* b) {
-    emit_byte(b, OP_SCONCAT);
 }

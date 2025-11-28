@@ -72,34 +72,15 @@ void emit_byte(BytecodeEmitter* b, uint8_t val);
 void emit_store(BytecodeEmitter* b, VarType type, int slot);
 void emit_load(BytecodeEmitter* b, VarType type, int slot);
 
-void emit_iadd(BytecodeEmitter* b);
-void emit_isub(BytecodeEmitter* b);
-void emit_imul(BytecodeEmitter* b);
-void emit_idiv(BytecodeEmitter* b);
-
-void emit_igt(BytecodeEmitter* b);
-void emit_igte(BytecodeEmitter* b);
-void emit_ilt(BytecodeEmitter* b);
-void emit_ilte(BytecodeEmitter* b);
-void emit_ieq(BytecodeEmitter* b);
-void emit_ineq(BytecodeEmitter* b);
 void emit_icompound_assignment(BytecodeEmitter* b, TokenType op, int slot);
-
-void emit_beq(BytecodeEmitter* b);
-void emit_bneq(BytecodeEmitter* b);
-
-void emit_neg(BytecodeEmitter* b);
-void emit_not(BytecodeEmitter* b);
 
 int emit_jmpn(BytecodeEmitter* b, int steps);
 int emit_jmpt(BytecodeEmitter* b, int steps);
 int emit_jmp(BytecodeEmitter* b, int steps);
 
-void emit_imod(BytecodeEmitter* b);
 
 void patch_int(BytecodeEmitter* b, int new_value, int starts_at);
 
 void emit_push_string(BytecodeEmitter* b, char* str);
-void emit_sconcat(BytecodeEmitter* b);
 
 #endif //GRBLANG_BYTECODE_EMIT_H
