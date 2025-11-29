@@ -39,8 +39,12 @@ VarType get_expr_type(ASTNode* node, Resolver* r) {
             return array_type;
         case AST_BINARY_OP: {
             TokenType op = node->binary_op.op;
-            BaseType left_type = get_expr_type(node->binary_op.left, r).base_type;
-            BaseType right_type = get_expr_type(node->binary_op.left, r).base_type;
+            VarType left_var_type = get_expr_type(node->binary_op.left, r);
+            if (left_var_type.nested != -1) {
+                return left_var_type;
+            }
+            BaseType left_type = left_var_type.base_type;
+            BaseType right_type = get_expr_type(node->binary_op.right, r).base_type;
             if (op == TOK_PLUS) {
                 if (left_type == VALUE_INT && right_type == VALUE_INT) {
                     return int_type;
@@ -97,7 +101,14 @@ void type_check(ASTNode *node, Resolver* r) {
 
         VarType left_var_type = get_expr_type(node->binary_op.left, r);
         VarType right_var_type = get_expr_type(node->binary_op.right, r);
-        if (left_var_type.nested != -1 || right_var_type.nested != -1) {
+        if (left_var_type.nested != -1 && node->binary_op.op == TOK_PLUS && // is array
+            right_var_type.nested != left_var_type.nested - 1 && // rhs nested correct
+            right_var_type.base_type != left_var_type.base_type // rhs base correct
+        ) {
+            fprintf(stderr, "invalid rhs type %s(nested=%d) for array of type %s(nested=%d) assignment", base_type_string(right_var_type.base_type), right_var_type.nested, base_type_string(left_var_type.base_type), left_var_type.nested);
+            exit(1);
+        }
+        if ((left_var_type.nested != -1 || right_var_type.nested != -1) && node->binary_op.op != TOK_PLUS) {
             fprintf(stderr, "binary operation %s not allowed on array", op_string(node->binary_op.op));
             exit(1);
         }
