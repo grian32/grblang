@@ -24,6 +24,7 @@ typedef struct {
 typedef struct ArrayValue {
     StackValue* arr_val;
     int len;
+    int capacity;
     int ref_count;
 } ArrayValue;
 

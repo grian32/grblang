@@ -65,7 +65,8 @@ void vm_run(VM* vm) {
                 ArrayValue* arrv = malloc(sizeof(ArrayValue));
                 arrv->len = len;
                 arrv->ref_count = 0;
-                arrv->arr_val = malloc(sizeof(StackValue) * len);
+                arrv->capacity = ((len / 64) + 1) * 64;
+                arrv->arr_val = malloc(sizeof(StackValue) * arrv->capacity);
 
                 for (int i = len - 1; i >= 0; i--) {
                     StackValue val = stack_pop(&vm->stack);
@@ -348,6 +349,24 @@ void vm_run(VM* vm) {
                 }
 
                 array.array_val->arr_val[idx.int_val] = value;
+                break;
+            }
+            case OP_ARRAPPEND: {
+                StackValue value = stack_pop(&vm->stack);
+                StackValue array = stack_pop(&vm->stack);
+
+                if (array.array_val->len + 1 >= array.array_val->capacity) {
+                    array.array_val->capacity *= 2;
+                    StackValue* new_arr = realloc(array.array_val->arr_val, array.array_val->capacity * sizeof(StackValue));
+                    if (!new_arr) {
+                        fprintf(stderr, "runtime error: failed to reallocate memory for array append\n");
+                        exit(1);
+                    }
+                    array.array_val->arr_val = new_arr;
+                }
+
+                array.array_val->arr_val[array.array_val->len++] = value;
+                stack_push(&vm->stack, array);
                 break;
             }
             default:

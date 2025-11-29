@@ -18,44 +18,45 @@ typedef struct {
 } BytecodeEmitter;
 
 typedef enum {
-    OP_PUSH,
-    OP_PUSH_TRUE, // true
-    OP_PUSH_FALSE, // false
-    OP_PUSH_ARRAY,
-    OP_IADD,
-    OP_IADDSTORE,
-    OP_ISUB,
-    OP_ISUBSTORE,
-    OP_IMUL,
-    OP_IMULSTORE,
-    OP_IDIV,
-    OP_IDIVSTORE,
-    OP_INEG,
-    OP_IGT,
-    OP_IGTE,
-    OP_ILT,
-    OP_ILTE,
-    OP_IEQ,
-    OP_IMOD,
-    OP_BEQ,
-    OP_INEQ,
-    OP_BNEQ,
-    OP_ISTORE, // int
-    OP_ILOAD,
-    OP_BSTORE, // bool
-    OP_BLOAD,
-    OP_ARRSTORE, // arrays
-    OP_ARRLOAD,
-    OP_NOT,
-    OP_JMPN,
-    OP_JMPT,
-    OP_JMP,
-    OP_PUSH_STRING,
-    OP_SCONCAT,
-    OP_SSTORE,
-    OP_SLOAD,
-    OP_ARRLOADIDX,
-    OP_ARRSTOREIDX,
+    OP_PUSH, // 0
+    OP_PUSH_TRUE, // true // 1
+    OP_PUSH_FALSE, // false // 2
+    OP_PUSH_ARRAY, // 3
+    OP_IADD, // 4
+    OP_IADDSTORE, // 5
+    OP_ISUB, // 6
+    OP_ISUBSTORE, // 7
+    OP_IMUL, // 8
+    OP_IMULSTORE, // 9
+    OP_IDIV, // 10
+    OP_IDIVSTORE, // 11
+    OP_INEG, // 12
+    OP_IGT, // 13
+    OP_IGTE, // 14
+    OP_ILT, // 15
+    OP_ILTE, // 16
+    OP_IEQ, // 17
+    OP_IMOD, // 18
+    OP_BEQ, // 19
+    OP_INEQ, // 20
+    OP_BNEQ, // 21
+    OP_ISTORE, // int // 22
+    OP_ILOAD, // 23
+    OP_BSTORE, // bool // 24
+    OP_BLOAD, // 25
+    OP_ARRSTORE, // arrays // 26
+    OP_ARRLOAD, // 27
+    OP_NOT, // 28
+    OP_JMPN, // 29
+    OP_JMPT, // 30
+    OP_JMP, // 31
+    OP_PUSH_STRING, // 32
+    OP_SCONCAT, // 33
+    OP_SSTORE, // 34
+    OP_SLOAD, // 35
+    OP_ARRLOADIDX, // 36
+    OP_ARRSTOREIDX, // 37
+    OP_ARRAPPEND, // 38
 } BytecodeOp;
 
 void bytecode_init(BytecodeEmitter* b);

@@ -71,7 +71,7 @@ int main(int argc, char* argv[]) {
     vm_init(&vm, &b, num_locals);
     vm_run(&vm);
 
-    char buffer[200];
+    char buffer[500];
     size_t printed = 0;
     stack_value_string(vm.stack.data[vm.stack.top], true, buffer, sizeof(buffer), &printed);
     print_visible(buffer);

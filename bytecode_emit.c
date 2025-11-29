@@ -83,7 +83,9 @@ void bytecode_gen(ASTNode* node, BytecodeEmitter* b, Resolver* r) {
             switch (node->binary_op.op) {
                 case TOK_PLUS: {
                     VarType leftType = get_expr_type(node->binary_op.left, r);
-                    if (leftType.base_type == VALUE_INT && leftType.nested == -1) {
+                    if (leftType.nested != -1) {
+                        emit_byte(b, OP_ARRAPPEND);
+                    } else if (leftType.base_type == VALUE_INT && leftType.nested == -1) {
                         emit_byte(b, OP_IADD);
                     } else if (leftType.base_type == VALUE_STRING && leftType.nested == -1) {
                         emit_byte(b, OP_SCONCAT);
