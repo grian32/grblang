@@ -158,8 +158,25 @@ void lex_parse_string(Lexer* l, char** str_out, const char** start_out, int* len
             }
             str = new_str;
         }
-        str[i++] = l->current;
-        lex_advance(l);
+        if (l->current == '\\') {
+            lex_advance(l);
+            char esc = l->current;
+            char out;
+            switch (esc) {
+                case 'n': out = '\n'; break;
+                case 't': out = '\t'; break;
+                case 'r': out = '\r'; break;
+                case '\\': out = '\\'; break;
+                case '"': out = '"'; break;
+                case '0': out = '\0'; break;
+                default: out = esc; break;
+            }
+            str[i++] = out;
+            lex_advance(l);
+        } else {
+            str[i++] = l->current;
+            lex_advance(l);
+        }
     }
     str[i] = '\0';
 
