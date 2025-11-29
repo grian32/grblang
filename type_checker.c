@@ -101,10 +101,11 @@ void type_check(ASTNode *node, Resolver* r) {
 
         VarType left_var_type = get_expr_type(node->binary_op.left, r);
         VarType right_var_type = get_expr_type(node->binary_op.right, r);
-        if (left_var_type.nested != -1 && node->binary_op.op == TOK_PLUS || // is array
-            right_var_type.nested != left_var_type.nested - 1 || // rhs nested correct
+        if ((left_var_type.nested != -1 && node->binary_op.op == TOK_PLUS) && // is array
+            right_var_type.nested != (left_var_type.nested - 1) || // rhs nested correct
             right_var_type.base_type != left_var_type.base_type // rhs base correct
         ) {
+            printf("%d, %d\n", right_var_type.nested, left_var_type.nested - 1);
             fprintf(stderr, "invalid rhs type %s(nested=%d) for array of type %s(nested=%d) in binop append\n", base_type_string(right_var_type.base_type), right_var_type.nested, base_type_string(left_var_type.base_type), left_var_type.nested);
             exit(1);
         }
