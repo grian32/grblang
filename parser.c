@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 VarType data_to_var_type(DataType tt) {
     switch (tt) {
@@ -257,6 +258,20 @@ void print_ast(ASTNode* node, int indent, bool newline) {
             }
             break;
         }
+        case AST_FUNCTION_CALL: {
+            printf("AST_FUNCTION_CALL(%s(", node->function_call.name);
+            for (int i = 0; i < node->function_call.args_len; i++) {
+                print_ast(node->function_call.args[i], indent, false);
+                if (i != node->function_call.args_len - 1) {
+                    printf(", ");
+                }
+            }
+            printf("))");
+            if (newline) {
+                printf("\n");
+            }
+            break;
+        }
         default:
             printf("unknown ast type: %d\n", node->type);
     }
@@ -420,6 +435,23 @@ ASTNode* make_while_statement(ASTNode* condition, ASTNode** statements, int stat
     return node;
 }
 
+ASTNode* make_function_call(ASTNode** args, int args_len, char* value) {
+    ASTNode* node = malloc(sizeof(ASTNode));
+
+    node->type = AST_FUNCTION_CALL;
+    ASTNode** new_args = realloc(args, sizeof(ASTNode*) * args_len);
+    if (!new_args) {
+        fprintf(stderr, "failed to realloc arguments array when making function call\n");
+        exit(1);
+    }
+
+    node->function_call.args = new_args;
+    node->function_call.args_len = args_len;
+    node->function_call.name = value;
+
+    return node;
+}
+
 ASTNode* parse_primary(Parser* p) {
     if (p->curr.type == TOK_INT) {
         ASTNode* n = make_int(p->curr.value.int_val);
@@ -448,6 +480,10 @@ ASTNode* parse_primary(Parser* p) {
     if (p->curr.type == TOK_IDENT) {
         char* name = p->curr.value.ident_val;
         parser_next(p);
+        if (p->curr.type == TOK_LPAREN) {
+            return parse_function_call(p, name);
+        }
+
         ASTNode* node = make_var_ref(name);
 
         while (p->curr.type == TOK_LBRACKET) {
@@ -735,6 +771,47 @@ ASTNode* parse_while_stmt(Parser* p) {
     parser_next(p);
 
     return make_while_statement(condition, statements, statements_count);
+}
+
+ASTNode* parse_function_call(Parser* p, char* name) {
+    parser_next(p);
+    int capacity = 32;
+    int size = 0;
+    ASTNode** args = malloc(sizeof(ASTNode*) * capacity);
+
+    while (p->curr.type != TOK_RPAREN) {
+        ASTNode* arg = parse_expr(p);
+
+        if (size >= capacity) {
+            capacity *= 2;
+            ASTNode** new_args = realloc(args, sizeof(ASTNode*) * capacity);
+            if (!new_args) {
+                fprintf(stderr, "failed to realloc when parsing function call\n");
+                exit(1);
+            }
+        }
+
+        if (p->curr.type == TOK_RPAREN) {
+            args[size++] = arg;
+            parser_next(p);
+            return make_function_call(args, size, name);
+        }
+
+        if (p->curr.type != TOK_COMMA) {
+            fprintf(stderr, "expected comma after argument in function call\n");
+            exit(1);
+        }
+
+        args[size++] = arg;
+    }
+
+    if (p->curr.type != TOK_RPAREN) {
+        fprintf(stderr, "expected ) after ( in function call\n");
+        exit(1);
+    }
+    parser_next(p);
+
+    return make_function_call(args, size, name);
 }
 
 void free_ast(ASTNode* node) {

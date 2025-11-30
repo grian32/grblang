@@ -20,6 +20,7 @@ typedef enum {
     AST_VAR_DECL,
     AST_VAR_ASSIGN,
     AST_VAR_REF,
+    AST_FUNCTION_CALL,
 } ASTNodeType;
 
 typedef enum {
@@ -125,6 +126,12 @@ typedef struct ASTNode {
             struct ASTNode* arr_index_expr; // only AST_ARRAY_INDEX
             struct ASTNode* value;
         } array_assign_expr;
+
+        struct {
+            char* name;
+            struct ASTNode** args;
+            int args_len;
+        } function_call;
     };
 } ASTNode;
 
@@ -161,6 +168,7 @@ ASTNode* make_var_ref(char* name);
 ASTNode* make_arr_literal(ASTNode** exprs, int len);
 ASTNode* make_arr_index(ASTNode* var_ref, ASTNode* index_expr);
 ASTNode* make_arr_index_assign(ASTNode* arr_index, ASTNode* value);
+ASTNode* make_function_call(ASTNode** args, int args_len, char* value);
 
 ASTNode* parse_compound_assignment(Parser* p);
 ASTNode* parse_logical_or(Parser* p);
@@ -179,6 +187,8 @@ ASTNode* parse_while_stmt(Parser* p);
 ASTNode* parse_array_literal(Parser* p);
 // assumes p.curr == tok_var
 ASTNode* parse_var_decl(Parser* p);
+// assumes p.curr == tok_lparen
+ASTNode* parse_function_call(Parser* p, char* ident_name);
 
 /**
  * = highest precendence parse; to be used as a top-level entry point for parsing expression

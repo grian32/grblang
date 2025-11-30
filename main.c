@@ -55,29 +55,29 @@ int main(int argc, char* argv[]) {
         print_ast(node, 0, true);
     }
 
-    type_check(node, &r);
+    // type_check(node, &r);
 
-    BytecodeEmitter b;
-    bytecode_init(&b);
-    bytecode_gen(node, &b, &r);
+    // BytecodeEmitter b;
+    // bytecode_init(&b);
+    // bytecode_gen(node, &b, &r);
 
-    free_ast(node);
+    // free_ast(node);
 
-    int num_locals = r.count;
+    // int num_locals = r.count;
 
-    free_resolver(&r);
+    // free_resolver(&r);
 
-    VM vm;
-    vm_init(&vm, &b, num_locals);
-    vm_run(&vm);
+    // VM vm;
+    // vm_init(&vm, &b, num_locals);
+    // vm_run(&vm);
 
-    char buffer[500];
-    size_t printed = 0;
-    stack_value_string(vm.stack.data[vm.stack.top], true, buffer, sizeof(buffer), &printed);
-    print_visible(buffer);
-    printf("\n");
+    // char buffer[500];
+    // size_t printed = 0;
+    // stack_value_string(vm.stack.data[vm.stack.top], true, buffer, sizeof(buffer), &printed);
+    // print_visible(buffer);
+    // printf("\n");
 
-    vm_free(&vm);
+    // vm_free(&vm);
     free(src);
 
     return 0;
