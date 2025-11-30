@@ -461,6 +461,15 @@ ASTNode* parse_primary(Parser* p) {
             node = make_arr_index(node, index_expr);
         }
 
+        if (p->curr.type == TOK_ASSIGN) {
+            parser_next(p);
+            ASTNode* value = parse_expr(p);
+
+            return make_arr_index_assign(node, value);
+        } else {
+            return node;
+        }
+
         return node;
     }
 
@@ -603,32 +612,6 @@ ASTNode* parse_var_decl(Parser* p) {
 ASTNode* parse_statement(Parser *p) {
     if (p->curr.type == TOK_VAR) {
         return parse_var_decl(p);
-    }
-
-    if (p->curr.type == TOK_IDENT && p->peek.type == TOK_LBRACKET) {
-        char* name = p->curr.value.ident_val;
-        parser_next(p);
-        ASTNode* node = make_var_ref(name);
-
-        while (p->curr.type == TOK_LBRACKET) {
-            parser_next(p);
-            ASTNode* index_expr = parse_expr(p);
-            if (p->curr.type != TOK_RBRACKET) {
-                fprintf(stderr, "expected ] after [ in array index\n");
-                exit(1);
-            }
-            parser_next(p);
-            node = make_arr_index(node, index_expr);
-        }
-
-        if (p->curr.type == TOK_ASSIGN) {
-            parser_next(p);
-            ASTNode* value = parse_expr(p);
-
-            return make_arr_index_assign(node, value);
-        } else {
-            return node;
-        }
     }
 
     if (p->curr.type == TOK_IDENT && p->peek.type == TOK_ASSIGN) {
