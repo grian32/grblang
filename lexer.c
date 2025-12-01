@@ -214,6 +214,9 @@ TokenType lex_parse_ident(Lexer* l, char** ident_out, const char** start_out, in
             if (strcmp(ident_str, "if") == 0) {
                 return TOK_IF;
             }
+            if (strcmp(ident_str, "fn") == 0) {
+                return TOK_FN;
+            }
         case 3:
             if (strcmp(ident_str, "var") == 0) {
                 return TOK_VAR;
@@ -247,6 +250,9 @@ TokenType lex_parse_ident(Lexer* l, char** ident_out, const char** start_out, in
             }
             break;
         case 6:
+            if (strcmp(ident_str, "return") == 0) {
+                return TOK_RETURN;
+            }
             if (strcmp(ident_str, "string") == 0) {
                 *type_out = DATA_STRING;
                 return TOK_TYPE;

@@ -21,6 +21,8 @@ typedef enum {
     AST_VAR_ASSIGN,
     AST_VAR_REF,
     AST_FUNCTION_CALL,
+    AST_FUNCTION_DECL,
+    AST_RETURN_STMT,
 } ASTNodeType;
 
 typedef enum {
@@ -39,14 +41,10 @@ typedef struct {
 char* base_type_string(BaseType type);
 void var_type_string(VarType type, char buffer[50]);
 
-// basically purely used in resolver for the type checker
 typedef struct {
-    union {
-        int int_val;
-        bool bool_val;
-        char* str_val;
-    };
-} VarValue;
+    char* name;
+    VarType type;
+} FunctionParam;
 
 typedef struct ASTNode {
     ASTNodeType type;
@@ -131,9 +129,25 @@ typedef struct ASTNode {
             char* name;
             struct ASTNode** args;
             int args_len;
+            int slot;
         } function_call;
+
+        struct {
+            char* name;
+            FunctionParam* params;
+            int params_len;
+            struct ASTNode** stmts;
+            int stmts_len;
+            VarType return_type;
+            int slot;
+        } function_decl;
+
+        struct {
+            struct ASTNode* expr;
+        } return_stmt;
     };
 } ASTNode;
+
 
 typedef struct {
     Token curr;
@@ -169,6 +183,8 @@ ASTNode* make_arr_literal(ASTNode** exprs, int len);
 ASTNode* make_arr_index(ASTNode* var_ref, ASTNode* index_expr);
 ASTNode* make_arr_index_assign(ASTNode* arr_index, ASTNode* value);
 ASTNode* make_function_call(ASTNode** args, int args_len, char* value);
+ASTNode* make_function_decl(ASTNode** stmts, int stmts_len, FunctionParam* params, int param_len, VarType return_type, char* name);
+ASTNode* make_return_stmt(ASTNode* expr);
 
 ASTNode* parse_compound_assignment(Parser* p);
 ASTNode* parse_logical_or(Parser* p);
@@ -189,6 +205,9 @@ ASTNode* parse_array_literal(Parser* p);
 ASTNode* parse_var_decl(Parser* p);
 // assumes p.curr == tok_lparen
 ASTNode* parse_function_call(Parser* p, char* ident_name);
+VarType parse_type(Parser* p);
+// assumes p.curr == tok_fn
+ASTNode* parse_fn_decl(Parser* p);
 
 /**
  * = highest precendence parse; to be used as a top-level entry point for parsing expression

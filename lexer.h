@@ -50,7 +50,9 @@ typedef enum {
     TOK_LBRACKET, // [ // 37
     TOK_RBRACKET, // ] // 38
     TOK_COMMA, // , // 39
-    TOK_EOF // 40
+    TOK_FN, // fn // 40
+    TOK_RETURN, // , // 41
+    TOK_EOF // 42
 } TokenType;
 
 typedef enum {

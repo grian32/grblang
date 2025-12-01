@@ -272,6 +272,36 @@ void print_ast(ASTNode* node, int indent, bool newline) {
             }
             break;
         }
+        case AST_FUNCTION_DECL: {
+            printf("AST_FUNCTION_DECL(%s(", node->function_decl.name);
+            for (int i = 0; i < node->function_decl.params_len; i++) {
+                FunctionParam param = node->function_decl.params[i];
+                printf("%s(%d) %s", base_type_string(param.type.base_type), param.type.nested, param.name);
+                if (i != node->function_decl.params_len - 1) {
+                    printf(", ");
+                }
+            }
+            printf(") ");
+            printf("{");
+            for (int i = 0; i < node->function_decl.stmts_len; i++) {
+                print_ast(node->function_decl.stmts[i], indent, false);
+                printf(";");
+            }
+            printf("}");
+            if (newline) {
+                printf("\n");
+            }
+            break;
+        }
+        case AST_RETURN_STMT: {
+            printf("AST_RETURN(");
+            print_ast(node->return_stmt.expr, indent, false);
+            printf(")");
+            if (newline) {
+                printf("\n");
+            }
+            break;
+        }
         default:
             printf("unknown ast type: %d\n", node->type);
     }
@@ -452,6 +482,40 @@ ASTNode* make_function_call(ASTNode** args, int args_len, char* value) {
     return node;
 }
 
+ASTNode* make_function_decl(ASTNode** stmts, int stmts_len, FunctionParam* params, int param_len, VarType return_type, char* name) {
+    ASTNode* node = malloc(sizeof(ASTNode));
+
+    node->type = AST_FUNCTION_DECL;
+    node->function_decl.return_type = return_type;
+    node->function_decl.name = name;
+    node->function_decl.stmts_len = stmts_len;
+    node->function_decl.params_len = param_len;
+    ASTNode** new_stmts = realloc(stmts, stmts_len * sizeof(ASTNode*));
+    if (!new_stmts) {
+        fprintf(stderr, "failed to realloc stmts when making function decl\n");
+        exit(1);
+    }
+    node->function_decl.stmts = new_stmts;
+
+    FunctionParam* new_params = realloc(params, param_len * sizeof(FunctionParam));
+    if (!new_params) {
+        fprintf(stderr, "failed to realloc params when making function decl\n");
+        exit(1);
+    }
+    node->function_decl.params = new_params;
+
+    return node;
+}
+
+ASTNode* make_return_stmt(ASTNode* expr) {
+    ASTNode* node = malloc(sizeof(ASTNode));
+
+    node->type = AST_RETURN_STMT;
+    node->return_stmt.expr = expr;
+
+    return node;
+}
+
 ASTNode* parse_primary(Parser* p) {
     if (p->curr.type == TOK_INT) {
         ASTNode* n = make_int(p->curr.value.int_val);
@@ -607,11 +671,10 @@ ASTNode* parse_expr(Parser* p) {
     return parse_logical_or(p);
 }
 
-ASTNode* parse_var_decl(Parser* p) {
-    parser_next(p);
+VarType parse_type(Parser* p) {
     if (p->curr.type != TOK_TYPE) {
         printf("%d\n", p->curr.type);
-        fprintf(stderr, "expected type ex:`bool`, `int` after `var` keyword in var declaration\n");
+        fprintf(stderr, "expected type ex:`bool`, `int` after keyword in declaration\n");
         exit(1);
     }
     VarType var_type = data_to_var_type(p->curr.value.type_val);
@@ -620,12 +683,19 @@ ASTNode* parse_var_decl(Parser* p) {
     while (p->curr.type == TOK_LBRACKET) {
         parser_next(p);
         if (p->curr.type != TOK_RBRACKET) {
-            fprintf(stderr, "expected ] after [ in var decl type parsing");
+            fprintf(stderr, "expected ] after [ in decl type parsing");
             exit(1);
         }
         parser_next(p);
         var_type.nested++;
     }
+
+    return var_type;
+}
+
+ASTNode* parse_var_decl(Parser* p) {
+    parser_next(p);
+    VarType var_type = parse_type(p);
 
     if (p->curr.type != TOK_IDENT) {
         fprintf(stderr, "expected identifier after type in var declaration\n");
@@ -646,6 +716,16 @@ ASTNode* parse_var_decl(Parser* p) {
 
 
 ASTNode* parse_statement(Parser *p) {
+    if (p->curr.type == TOK_RETURN) {
+        parser_next(p);
+        ASTNode* expr = parse_expr(p);
+        return make_return_stmt(expr);
+    }
+
+    if (p->curr.type == TOK_FN) {
+        return parse_fn_decl(p);
+    }
+
     if (p->curr.type == TOK_VAR) {
         return parse_var_decl(p);
     }
@@ -789,6 +869,7 @@ ASTNode* parse_function_call(Parser* p, char* name) {
                 fprintf(stderr, "failed to realloc when parsing function call\n");
                 exit(1);
             }
+            args = new_args;
         }
 
         if (p->curr.type == TOK_RPAREN) {
@@ -814,6 +895,85 @@ ASTNode* parse_function_call(Parser* p, char* name) {
     return make_function_call(args, size, name);
 }
 
+ASTNode* parse_fn_decl(Parser* p) {
+    parser_next(p);
+    VarType return_type = parse_type(p);
+
+    if (p->curr.type != TOK_IDENT) {
+        fprintf(stderr, "expected identifier after type in function declaration\n");
+        exit(1);
+    }
+    char* name = p->curr.value.ident_val;
+    parser_next(p);
+
+    if (p->curr.type != TOK_LPAREN) {
+        fprintf(stderr, "expected ( after identifier in function declaration\n");
+        exit(1);
+    }
+    parser_next(p);
+
+    int args_capacity = 32;
+    int args_size = 0;
+    FunctionParam* args = malloc(sizeof(FunctionParam) * args_capacity);
+
+    while (p->curr.type != TOK_RPAREN) {
+        VarType type = parse_type(p);
+        if (p->curr.type != TOK_IDENT) {
+            fprintf(stderr, "expected identifier after type in function declaration arguments\n");
+            exit(1);
+        }
+        char* arg_name = p->curr.value.ident_val;
+        parser_next(p);
+
+        if (args_size >= args_capacity) {
+            args_capacity *= 2;
+            FunctionParam* new_args = realloc(args, sizeof(FunctionParam) * args_capacity);
+            if (!new_args) {
+                fprintf(stderr, "failed to realloc when parsing function decl\n");
+                exit(1);
+            }
+            args = new_args;
+        }
+
+        FunctionParam arg = { .type = type, .name = arg_name};
+        if (p->curr.type == TOK_RPAREN) {
+            args[args_size++] = arg;
+            break;
+        }
+
+        if (p->curr.type != TOK_COMMA) {
+            fprintf(stderr, "expected comma after argument in function decl\n");
+            exit(1);
+        }
+
+        args[args_size++] = arg;
+    }
+
+    if (p->curr.type != TOK_RPAREN) {
+        fprintf(stderr, "expected ) after ( in function decl\n");
+        exit(1);
+    }
+    parser_next(p);
+
+    if (p->curr.type != TOK_LBRACE) {
+        fprintf(stderr, "expected { after argument list in function decl\n");
+        exit(1);
+    }
+    parser_next(p);
+
+    int stmts_capacity = 64;
+    int stmts_size = 0;
+    ASTNode** stmts = malloc(sizeof(ASTNode*) * stmts_capacity);
+    parse_block(p, stmts_capacity, TOK_RBRACE, &stmts, &stmts_size);
+    if (p->curr.type != TOK_RBRACE) {
+        fprintf(stderr, "expected } after function decl block\n");
+    }
+    parser_next(p);
+
+    return make_function_decl(stmts, stmts_size, args, args_size, return_type, name);
+}
+
+// TODO: add missing ast types to this
 void free_ast(ASTNode* node) {
     if (!node) return;
 
