@@ -137,6 +137,24 @@ void resolve(ASTNode* node, Resolver* r) {
                 resolve(node->array_literal.arr[i], r);
             }
             break;
+        case AST_FUNCTION_CALL:
+            for (int i = 0; i < node->function_call.args_len; i++) {
+                resolve(node->function_call.args[i], r);
+            }
+            node->function_call.slot = resolver_lookup(r, node->function_call.name);
+            if (node->function_call.slot == -1) {
+                fprintf(stderr, "undefined function `%s` when trying to call\n", node->function_call.name);
+                exit(1);
+            }
+            node->var_type = r->types[node->function_call.slot];
+            break;
+        case AST_FUNCTION_DECL:
+            for (int i = 0; i < node->function_decl.stmts_len; i++) {
+                resolve(node->function_decl.stmts[i], r);
+            }
+            node->function_decl.slot = resolver_declare(r, node->function_decl.name, node->function_decl.return_type);
+            node->var_type = node->function_decl.return_type;
+            break;
     }
 }
 

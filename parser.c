@@ -259,7 +259,7 @@ void print_ast(ASTNode* node, int indent, bool newline) {
             break;
         }
         case AST_FUNCTION_CALL: {
-            printf("AST_FUNCTION_CALL(%s(", node->function_call.name);
+            printf("AST_FUNCTION_CALL(slot=%d, %s(", node->function_call.slot, node->function_call.name);
             for (int i = 0; i < node->function_call.args_len; i++) {
                 print_ast(node->function_call.args[i], indent, false);
                 if (i != node->function_call.args_len - 1) {
@@ -273,7 +273,7 @@ void print_ast(ASTNode* node, int indent, bool newline) {
             break;
         }
         case AST_FUNCTION_DECL: {
-            printf("AST_FUNCTION_DECL(%s(", node->function_decl.name);
+            printf("AST_FUNCTION_DECL(slot=%d, %s(", node->function_decl.slot, node->function_decl.name);
             for (int i = 0; i < node->function_decl.params_len; i++) {
                 FunctionParam param = node->function_decl.params[i];
                 printf("%s(%d) %s", base_type_string(param.type.base_type), param.type.nested, param.name);
